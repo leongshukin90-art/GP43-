@@ -1,0 +1,29 @@
+[
+  {
+    "id": "USR-0001",
+    "username": "staff01",
+    "password": "123456",
+    "name": "Wong Ka Ming",
+    "role": "staff",
+    "phone": "+852 9123 4001",
+    "createdAt": "2026-09-01T08:00:00.000Z"
+  },
+  {
+    "id": "USR-0002",
+    "username": "admin01",
+    "password": "123456",
+    "name": "Lee Mei Ling",
+    "role": "admin",
+    "phone": "+852 9123 4002",
+    "createdAt": "2026-09-01T08:05:00.000Z"
+  },
+  {
+    "id": "USR-0003",
+    "username": "cust01",
+    "password": "123456",
+    "name": "Chan Tai Man",
+    "role": "customer",
+    "phone": "+852 9123 4003",
+    "createdAt": "2026-09-01T08:10:00.000Z"
+  }
+]

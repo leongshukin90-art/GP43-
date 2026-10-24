@@ -1,0 +1,22 @@
+[
+  {
+    "id": "EXC-0001",
+    "packageId": "PKG-1005",
+    "type": "Damaged packaging",
+    "description": "Outer packaging is torn and requires staff assessment.",
+    "status": "Open",
+    "reportedBy": "USR-0001",
+    "createdAt": "2026-09-29T06:40:00.000Z",
+    "resolvedAt": null
+  },
+  {
+    "id": "EXC-0002",
+    "packageId": "PKG-1004",
+    "type": "Address issue",
+    "description": "Recipient phone number was incomplete; contact details were confirmed.",
+    "status": "Resolved",
+    "reportedBy": "USR-0001",
+    "createdAt": "2026-09-23T05:10:00.000Z",
+    "resolvedAt": "2026-09-23T09:15:00.000Z"
+  }
+]

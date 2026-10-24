@@ -1,0 +1,1230 @@
+<!doctype html>
+<!--
+  Throwaway LOGIC prototype for the Cainiao LMS.
+  Question: can one small in-memory state model drive login, every role page, and the package lifecycle?
+  Open directly. No server, package install, external library, or persistence.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cainiao LMS · Functional Prototype</title>
+<style>
+:root{--bg:#eef3f8;--panel:#fff;--ink:#172033;--muted:#687386;--line:#d8e0ea;--orange:#f97316;--orange-dark:#c2410c;--nav:#14243d;--nav-soft:#28466d;--green:#15803d;--amber:#b45309;--red:#b91c1c;--blue:#2563eb;--radius:16px;--shadow:0 14px 34px rgba(23,32,51,.10)}
+*{box-sizing:border-box}html,body{min-height:100%}body{margin:0;color:var(--ink);background:var(--bg);font:15px/1.5 "Segoe UI","Microsoft YaHei",Arial,sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer}a{color:inherit}.mono{font-family:"Cascadia Code",Consolas,monospace}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+.prototype-note{position:fixed;z-index:60;top:12px;left:50%;transform:translateX(-50%);padding:6px 12px;border:1px solid #d8e0ea;border-radius:999px;background:rgba(255,255,255,.94);box-shadow:0 8px 24px rgba(23,32,51,.1);font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;pointer-events:none}
+.toast{position:fixed;z-index:100;right:18px;bottom:18px;max-width:340px;padding:12px 14px;border-radius:12px;color:#fff;background:#101827;box-shadow:var(--shadow);opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none}.toast.show{opacity:1;transform:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:8px 13px;border:1px solid transparent;border-radius:9px;font-weight:800}.btn-primary{color:#fff;background:var(--orange)}.btn-primary:hover{background:var(--orange-dark)}.btn-soft{color:#334155;background:#fff;border-color:var(--line)}.btn-danger{color:#fff;background:var(--red)}.btn-success{color:#fff;background:var(--green)}.btn:disabled{opacity:.45;cursor:not-allowed}
+.field{display:grid;gap:6px}.field label{color:#536174;font-size:12px;font-weight:800}.field input,.field select,.field textarea{width:100%;padding:10px 11px;border:1px solid #cfd8e5;border-radius:9px;background:#fff;color:var(--ink)}.field textarea{resize:vertical}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.form-grid .wide{grid-column:1/-1}
+.login-shell{min-height:100vh;display:grid;place-items:center;padding:70px 16px 40px;background:radial-gradient(circle at 15% 15%,#ffedd5,transparent 30%),linear-gradient(135deg,#eff5fc,#f8fafc)}.login-card{width:min(940px,100%);display:grid;grid-template-columns:1.05fr .95fr;overflow:hidden;border-radius:24px;background:#fff;box-shadow:0 28px 70px rgba(23,32,51,.16)}.login-info{padding:42px;color:#fff;background:linear-gradient(140deg,#14243d,#28466d)}.login-info h1{margin:14px 0 10px;font-size:40px;line-height:1.03;letter-spacing:-.04em}.login-info p{color:#dce8f7}.brand-mark{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#fb923c,#ea580c);font-size:22px;font-weight:900}.login-form{padding:42px;display:grid;align-content:center;gap:15px}.login-form h2{margin:0 0 4px}.error-box,.success-box{padding:10px 12px;border-radius:9px;font-size:13px}.error-box{color:#991b1b;background:#fee2e2}.success-box{color:#166534;background:#dcfce7}.demo-users{display:grid;gap:8px;margin-top:8px}.demo-user{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#f8fafc}.scenario-box{margin-top:18px;padding:14px;border:1px dashed #9fb0c5;border-radius:12px;background:#f8fafc}.scenario-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.app-shell{display:grid;grid-template-columns:184px minmax(0,1fr) 276px;min-height:100vh}.app-header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 22px;color:#fff;background:linear-gradient(100deg,#14243d,#28466d)}.app-user{display:flex;align-items:center;gap:12px}.app-user small{display:block;color:#c8d8eb}.function-tabs{display:flex;gap:8px;margin:0 0 20px;padding:6px;overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:0 8px 22px rgba(23,32,51,.05)}.function-tab{flex:0 0 auto;padding:9px 14px;border:0;border-radius:9px;color:#526175;background:transparent;font-weight:800}.function-tab:hover{background:#f1f5f9}.function-tab.active{color:#fff;background:var(--orange)}.sidebar{padding:22px 11px;color:#dce8f7;background:linear-gradient(180deg,#14243d,#1c3150)}.brand{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:900}.nav{display:grid;gap:5px;margin-top:22px}.nav button{display:flex;justify-content:space-between;width:100%;padding:9px 8px;border:0;border-radius:8px;color:#b8c9dd;background:transparent;text-align:left;font-size:12px}.nav button.active{color:#fff;background:#2a4a74}.sidebar-user{margin-top:28px;padding-top:18px;border-top:1px solid #34506f;font-size:12px}.main{min-width:0;padding:24px 26px 88px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}.topbar h1{margin:0;font-size:clamp(25px,3vw,36px);letter-spacing:-.04em}.topbar p{margin:3px 0 0;color:var(--muted)}.state-panel{padding:22px;border-left:1px solid var(--line);background:#f8fafc}.state-panel h2{margin-top:0;font-size:16px}.state-list{display:grid;gap:10px}.state-row{display:flex;justify-content:space-between;gap:12px;padding-bottom:8px;border-bottom:1px solid var(--line);font-size:12px}.state-row span:first-child{color:var(--muted)}.change-note{margin-top:14px;padding:10px;border-left:3px solid var(--orange);background:#fff7ed;font-size:12px}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}.metric{padding:16px;border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:0 8px 22px rgba(23,32,51,.05)}.metric span{color:var(--muted);font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}.metric strong{display:block;margin-top:6px;font-size:28px}.card{border:1px solid var(--line);border-radius:var(--radius);background:#fff;box-shadow:0 8px 22px rgba(23,32,51,.05);overflow:hidden}.card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid #e8edf3}.card-head h2{margin:0;font-size:16px}.card-body{padding:16px}.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{padding:11px 13px;border-bottom:1px solid #edf1f6;text-align:left;font-size:12px}th{color:var(--muted);background:#f8fafc;font-size:10px;text-transform:uppercase;letter-spacing:.06em}tr.selectable{cursor:pointer}tr.selectable:hover,tr.selected{background:#fff7ed}.badge{display:inline-flex;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:900;white-space:nowrap}.badge-arrived{color:#1d4ed8;background:#dbeafe}.badge-shelved{color:#0369a1;background:#e0f2fe}.badge-notified{color:#92400e;background:#fef3c7}.badge-picked{color:#166534;background:#dcfce7}.badge-exception{color:#991b1b;background:#fee2e2}.empty{padding:28px;color:var(--muted);text-align:center}.parcel-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.parcel-card{padding:15px;border:1px solid var(--line);border-radius:13px;background:#fff}.parcel-card h3{margin:0}.parcel-card .code{margin:12px 0;padding:12px;border-radius:10px;color:#fff7ed;background:#172033;font-family:monospace;font-size:20px;font-weight:900;letter-spacing:.12em}.timeline{display:grid;gap:12px}.timeline-item{display:grid;grid-template-columns:12px 1fr;gap:10px}.dot{width:11px;height:11px;margin-top:4px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px #ffedd5}.chart{display:flex;align-items:end;gap:9px;height:180px;padding-top:12px;border-bottom:1px solid var(--line)}.bar{flex:1;min-height:8px;border-radius:7px 7px 0 0;background:linear-gradient(#fb923c,#ea580c)}.shelf-row{display:grid;grid-template-columns:1fr 120px 110px 100px;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #edf1f6}
+.tab-shell{display:grid;gap:8px;margin-bottom:18px;padding:10px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.74)}
+.tab-row{display:flex;align-items:center;gap:6px;overflow-x:auto;padding-bottom:2px}
+.tab-row-label{flex:0 0 66px;color:var(--muted);font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.tab-button{flex:0 0 auto;padding:7px 11px;border:1px solid transparent;border-radius:999px;color:#526074;background:transparent;font-size:12px;font-weight:800}
+.tab-button:hover{background:#eef3f8}
+.tab-button.active{color:#fff;background:var(--orange);border-color:var(--orange)}
+.tab-row.secondary{border-top:1px solid var(--line);padding-top:7px}@media(max-width:1100px){.app-shell{grid-template-columns:minmax(0,1fr)}.state-panel{grid-column:1/-1;border-left:0;border-top:1px solid var(--line)}.metrics{grid-template-columns:1fr 1fr}}
+@media(max-width:800px){.prototype-note{font-size:9px;max-width:calc(100vw - 20px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.login-card{grid-template-columns:1fr}.login-info,.login-form{padding:28px}.app-shell{display:block}.app-header{padding:52px 14px 12px}.app-user{align-items:flex-end;flex-direction:column;gap:4px}.main{padding:14px 14px 80px}.function-tabs{margin-top:10px}.topbar{align-items:flex-start;flex-direction:column}.grid-2,.grid-3,.parcel-cards,.form-grid{grid-template-columns:1fr}}
+@media(max-width:520px){.metrics{grid-template-columns:1fr 1fr}.metric{padding:12px}.metric strong{font-size:23px}.nav{grid-template-columns:1fr}.shelf-row{grid-template-columns:1fr 1fr}.login-info h1{font-size:31px}.main{padding-left:11px;padding-right:11px}}
+    .source-toggle { position: fixed; z-index:90; right:18px; bottom:18px; padding:9px 13px; border:1px solid #24364d; border-radius:999px; color:#fff; background:#172033; box-shadow:0 12px 28px rgba(23,32,51,.2); font-weight:800; }
+    .source-panel { position:fixed; z-index:110; right:18px; bottom:72px; width:min(960px,calc(100vw - 24px)); height:min(76vh,760px); display:grid; grid-template-rows:auto auto minmax(0,1fr); overflow:hidden; border:1px solid #24364d; border-radius:18px; background:#0b1220; box-shadow:0 28px 70px rgba(0,0,0,.34); opacity:0; visibility:hidden; transform:translateY(14px); transition:.2s; }
+    .source-panel.open { opacity:1; visibility:visible; transform:none; }
+    .source-head { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; color:#e7f0fb; border-bottom:1px solid #1d3048; background:#111d2e; }
+    .source-head strong { display:block; }.source-head span { color:#8fa8c1; font-size:12px; }
+    .source-tabs { display:flex; gap:6px; overflow-x:auto; padding:10px; border-bottom:1px solid #1d3048; background:#0d1828; }
+    .source-tab { flex:0 0 auto; padding:7px 10px; border:1px solid #263c58; border-radius:8px; color:#9fb6cf; background:transparent; font:12px var(--font-mono); }
+    .source-tab.active { color:#07111e; border-color:#65d6c1; background:#65d6c1; }.source-code { margin:0; padding:18px; overflow:auto; color:#dce9f7; background:#08111f; font:12px/1.65 var(--font-mono); white-space:pre-wrap; overflow-wrap:anywhere; }
+    .source-close { padding:6px 9px; border:1px solid #3c526d; border-radius:8px; color:#dce9f7; background:transparent; }
+    @media(max-width:600px){.source-toggle{right:12px;bottom:12px}.source-panel{right:6px;bottom:62px;width:calc(100vw - 12px);height:78vh}.source-code{padding:12px;font-size:11px}}</style>
+</head>
+<body>
+<div class="prototype-note">Logic prototype · in-memory only · refresh resets</div>
+<div id="app"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div><button class="source-toggle" type="button" data-source-toggle>HTML functions</button>
+<section class="source-panel" id="source-panel" aria-hidden="true" aria-label="HTML rendering function source">
+  <header class="source-head"><div><strong>HTML render functions</strong><span>Click a tab to read the function that builds each screen.</span></div><div><button class="source-close" type="button" data-source-copy>Copy</button> <button class="source-close" type="button" data-source-close>Close</button></div></header>
+  <nav class="source-tabs" id="source-tabs" aria-label="Render function tabs"></nav>
+  <pre class="source-code" id="source-code"></pre>
+</section>
+<script>const DEMO_USERS = [
+  { id: 'U1', username: 'staff01', password: '123456', name: 'Wong Ka Ming', role: 'staff', phone: '+852 9000 0001' },
+  { id: 'U2', username: 'admin01', password: '123456', name: 'Lee Mei Ling', role: 'admin', phone: '+852 9000 0002' },
+  { id: 'U3', username: 'cust01', password: '123456', name: 'Chan Tai Man', role: 'customer', phone: '+852 9000 0003' },
+  { id: 'U4', username: 'cust02', password: '123456', name: 'Lau Mei Mei', role: 'customer', phone: '+852 9000 0004' }
+];
+
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function initialData() {
+  return {
+    users: clone(DEMO_USERS),
+    packages: [
+      { id: 'P1', trackingNo: 'HK-1001', recipientName: 'Chan Tai Man', customerId: 'U3', status: 'Arrived', type: 'Document', weight: 1.2, shelfId: null, pickupCode: null, arrivedAt: '06 Oct 09:10', shelvedAt: null, notifiedAt: null, pickedUpAt: null },
+      { id: 'P2', trackingNo: 'HK-1002', recipientName: 'Chan Tai Man', customerId: 'U3', status: 'Shelved', type: 'Parcel', weight: 2.4, shelfId: 'S1', pickupCode: '310245', arrivedAt: '05 Oct 14:20', shelvedAt: '05 Oct 15:00', notifiedAt: null, pickedUpAt: null },
+      { id: 'P3', trackingNo: 'HK-1003', recipientName: 'Chan Tai Man', customerId: 'U3', status: 'Notified', type: 'Fragile', weight: 0.8, shelfId: 'S2', pickupCode: '481920', arrivedAt: '06 Oct 08:30', shelvedAt: '06 Oct 09:00', notifiedAt: '06 Oct 09:05', pickedUpAt: null },
+      { id: 'P4', trackingNo: 'HK-1004', recipientName: 'Chan Tai Man', customerId: 'U3', status: 'Exception', type: 'Parcel', weight: 3.1, shelfId: null, pickupCode: null, arrivedAt: '04 Oct 11:00', shelvedAt: null, notifiedAt: null, pickedUpAt: null, previousStatus: 'Arrived' },
+      { id: 'P5', trackingNo: 'HK-2001', recipientName: 'Lau Mei Mei', customerId: 'U4', status: 'Arrived', type: 'Parcel', weight: 1.7, shelfId: null, pickupCode: null, arrivedAt: '06 Oct 10:15', shelvedAt: null, notifiedAt: null, pickedUpAt: null }
+    ],
+    shelves: [
+      { id: 'S1', code: 'S-A-01', capacity: 3, used: 1, status: 'Active' },
+      { id: 'S2', code: 'S-B-01', capacity: 2, used: 1, status: 'Active' }
+    ],
+    notifications: [
+      { id: 'N1', userId: 'U3', packageId: 'P3', title: 'Parcel ready for pickup: HK-1003', content: 'Pickup code 481920.', createdAt: '06 Oct 09:05' }
+    ],
+    exceptions: [
+      { id: 'E1', packageId: 'P4', type: 'Damaged', description: 'Box dented during transport.', status: 'Open', reportedBy: 'U1', createdAt: '04 Oct 12:00', resolvedAt: null }
+    ],
+    logs: [
+      { id: 'L1', action: 'LOGIN', userId: 'U1', username: 'staff01', detail: 'User signed in.', createdAt: '06 Oct 08:00' },
+      { id: 'L2', action: 'PACKAGE_SHELVED', userId: 'U1', username: 'staff01', detail: 'HK-1002 placed on S-A-01.', createdAt: '05 Oct 15:00' },
+      { id: 'L3', action: 'PACKAGE_NOTIFIED', userId: 'U1', username: 'staff01', detail: 'HK-1003 notification generated.', createdAt: '06 Oct 09:05' },
+      { id: 'L4', action: 'EXCEPTION_REPORTED', userId: 'U1', username: 'staff01', detail: 'HK-1004 marked Damaged.', createdAt: '04 Oct 12:00' }
+    ],
+    config: { siteName: 'Cainiao Post HK', siteCode: 'HK-DEMO', address: '88 Demo Road', phone: '+852 3000 8000', notificationTemplate: 'Hello {{name}}, parcel {{trackingNo}} is ready. Pickup code: {{pickupCode}}.' }
+  };
+}
+
+function initialState() {
+  return {
+    ...initialData(),
+    currentUser: null,
+    route: 'login',
+    selectedPackageId: 'P2',
+    search: '',
+    lastChange: 'Prototype ready.',
+    error: ''
+  };
+}
+
+function nextId(prefix, records) {
+  const highest = records.reduce((max, item) => {
+    const value = Number(String(item.id || '').replace(/\D/g, ''));
+    return Number.isFinite(value) ? Math.max(max, value) : max;
+  }, 0);
+  return `
+  ${prefix}${highest + 1}
+  `;
+}
+
+function nowLabel() {
+  return new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Hong_Kong' }).format(new Date());
+}
+
+function addLog(state, action, detail) {
+  const user = state.currentUser;
+  state.logs.push({ id: nextId('L', state.logs), action, userId: user?.id || 'guest', username: user?.username || 'guest', detail, createdAt: nowLabel() });
+}
+
+function roleHome(role) {
+  if (role === 'staff') return 'staff-dashboard';
+  if (role === 'admin') return 'admin-reports';
+  return 'customer-packages';
+}
+
+function eligibleForException(pkg) {
+  return ['Arrived', 'Shelved', 'Notified'].includes(pkg.status);
+}
+
+function resolveExceptionState(state, exceptionId) {
+  const exception = state.exceptions.find((item) => item.id === exceptionId);
+  if (!exception || exception.status !== 'Open') return 'Open exception not found.';
+  const pkg = state.packages.find((item) => item.id === exception.packageId);
+  if (!pkg) return 'Linked parcel not found.';
+  const previous = pkg.previousStatus || 'Arrived';
+  let restoredShelf = false;
+  if (pkg.shelfId && ['Shelved', 'Notified'].includes(previous)) {
+    const shelf = state.shelves.find((item) => item.id === pkg.shelfId);
+    if (shelf && shelf.status === 'Active' && shelf.used < shelf.capacity) {
+      shelf.used += 1;
+      restoredShelf = true;
+    }
+  }
+  if (!restoredShelf) {
+    pkg.shelfId = null;
+    pkg.pickupCode = null;
+    state.notifications = state.notifications.filter((item) => item.packageId !== pkg.id);
+  }
+  pkg.status = restoredShelf ? previous : 'Arrived';
+  delete pkg.previousStatus;
+  exception.status = 'Resolved';
+  exception.resolvedAt = nowLabel();
+  addLog(state, 'EXCEPTION_RESOLVED', `${pkg.trackingNo} resolved.`);
+  return `
+  Exception resolved. Parcel is now ${pkg.status}.
+  `;
+}
+function reducer(state, action) {
+  const next = clone(state);
+
+  switch (action.type) {
+    case 'RESET':
+      return { ...initialState(), lastChange: 'Prototype reset.' };
+
+    case 'LOGIN': {
+      const username = String(action.username || '').trim();
+      const user = next.users.find((item) => item.username === username && item.password === String(action.password || ''));
+      if (!user) {
+        next.error = 'Invalid username or password.';
+        next.lastChange = next.error;
+        return next;
+      }
+      next.currentUser = user;
+      next.route = roleHome(user.role);
+      next.error = '';
+      next.lastChange = `${user.name} signed in as ${user.role}.`;
+      addLog(next, 'LOGIN', 'User signed in.');
+      return next;
+    }
+
+    case 'LOGOUT':
+      addLog(next, 'LOGOUT', 'User signed out.');
+      return { ...clone(initialState()), lastChange: 'Signed out.' };
+
+    case 'NAVIGATE':
+      next.route = action.route;
+      next.error = '';
+      next.lastChange = `Opened ${action.route}.`;
+      return next;
+
+    case 'SELECT_PACKAGE':
+      next.selectedPackageId = action.packageId;
+      next.route = next.currentUser.role === 'customer' ? 'customer-detail' : 'staff-detail';
+      next.lastChange = `Selected ${action.packageId}.`;
+      return next;
+
+    case 'SET_SEARCH':
+      next.search = String(action.search || '').trim();
+      next.lastChange = next.search ? `Searching for "${next.search}".` : 'Search cleared.';
+      return next;
+
+    case 'CREATE_PACKAGE': {
+      const trackingNo = String(action.trackingNo || '').trim().toUpperCase();
+      const weight = Number(action.weight);
+      if (!trackingNo || !action.recipientName || !action.customerId || !Number.isFinite(weight) || weight <= 0) {
+        next.error = 'Complete all parcel fields with a positive weight.';
+        next.lastChange = next.error;
+        return next;
+      }
+      if (next.packages.some((item) => item.trackingNo === trackingNo)) {
+        next.error = 'Tracking number already exists.';
+        next.lastChange = next.error;
+        return next;
+      }
+      const pkg = { id: nextId('P', next.packages), trackingNo, recipientName: action.recipientName, customerId: action.customerId, status: 'Arrived', type: action.type || 'Parcel', weight, shelfId: null, pickupCode: null, arrivedAt: nowLabel(), shelvedAt: null, notifiedAt: null, pickedUpAt: null };
+      next.packages.push(pkg);
+      addLog(next, 'PACKAGE_CREATED', `${trackingNo} received.`);
+      next.route = 'staff-detail';
+      next.selectedPackageId = pkg.id;
+      next.error = '';
+      next.lastChange = `${trackingNo} received.`;
+      return next;
+    }
+
+    case 'BATCH_CREATE': {
+      const lines = String(action.batch || '').split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+      let created = 0;
+      const errors = [];
+      lines.forEach((line, index) => {
+        const [trackingNo, recipientName, weightText, type] = line.split(/[|,]/).map((value) => value.trim());
+        const weight = Number(weightText);
+        if (!trackingNo || !recipientName || !Number.isFinite(weight) || weight <= 0) {
+          errors.push(index + 1);
+          return;
+        }
+        const pkg = { id: nextId('P', next.packages), trackingNo: trackingNo.toUpperCase(), recipientName, customerId: action.customerId, status: 'Arrived', type: type || 'Parcel', weight, shelfId: null, pickupCode: null, arrivedAt: nowLabel(), shelvedAt: null, notifiedAt: null, pickedUpAt: null };
+        next.packages.push(pkg);
+        created += 1;
+      });
+      addLog(next, 'PACKAGE_BATCH_CREATED', `${created} parcels batch received.`);
+      next.error = errors.length ? `Skipped rows: ${errors.join(', ')}.` : '';
+      next.lastChange = `Batch complete: ${created} created.`;
+      return next;
+    }
+    case 'SHELVE': {
+      const pkg = next.packages.find((item) => item.id === action.packageId);
+      const shelf = next.shelves.find((item) => item.id === action.shelfId);
+      if (!pkg || pkg.status !== 'Arrived') { next.error = 'Only Arrived parcels can be shelved.'; next.lastChange = next.error; return next; }
+      if (!shelf || shelf.status !== 'Active' || shelf.used >= shelf.capacity) { next.error = 'Select an active shelf with capacity.'; next.lastChange = next.error; return next; }
+      pkg.shelfId = shelf.id;
+      pkg.pickupCode = String(Math.floor(100000 + Math.random() * 900000));
+      pkg.status = 'Shelved';
+      pkg.shelvedAt = nowLabel();
+      shelf.used += 1;
+      addLog(next, 'PACKAGE_SHELVED', `${pkg.trackingNo} placed on ${shelf.code}.`);
+      next.lastChange = `${pkg.trackingNo} shelved with code ${pkg.pickupCode}.`;
+      next.error = '';
+      return next;
+    }
+
+    case 'NOTIFY': {
+      const pkg = next.packages.find((item) => item.id === action.packageId);
+      if (!pkg || pkg.status !== 'Shelved' || !pkg.pickupCode) { next.error = 'Only Shelved parcels with a pickup code can be notified.'; next.lastChange = next.error; return next; }
+      pkg.status = 'Notified';
+      pkg.notifiedAt = nowLabel();
+      const content = next.config.notificationTemplate.replace('{{name}}', pkg.recipientName).replace('{{trackingNo}}', pkg.trackingNo).replace('{{pickupCode}}', pkg.pickupCode);
+      next.notifications.push({ id: nextId('N', next.notifications), userId: pkg.customerId, packageId: pkg.id, title: `Parcel ready: ${pkg.trackingNo}`, content, createdAt: nowLabel() });
+      addLog(next, 'PACKAGE_NOTIFIED', `${pkg.trackingNo} notification generated.`);
+      next.lastChange = `${pkg.trackingNo} notification generated.`;
+      next.error = '';
+      return next;
+    }
+
+    case 'PICKUP': {
+      const pkg = next.packages.find((item) => item.id === action.packageId);
+      if (!pkg || pkg.status !== 'Notified') { next.error = 'Only Notified parcels can be picked up.'; next.lastChange = next.error; return next; }
+      pkg.status = 'Picked Up';
+      pkg.pickedUpAt = nowLabel();
+      const shelf = next.shelves.find((item) => item.id === pkg.shelfId);
+      if (shelf && shelf.used > 0) shelf.used -= 1;
+      addLog(next, 'PACKAGE_PICKED_UP', `${pkg.trackingNo} picked up.`);
+      next.lastChange = `${pkg.trackingNo} picked up.`;
+      next.error = '';
+      return next;
+    }
+
+    case 'REPORT_EXCEPTION': {
+      const pkg = next.packages.find((item) => item.id === action.packageId);
+      if (!pkg || !eligibleForException(pkg)) { next.error = 'Parcel cannot enter exception flow.'; next.lastChange = next.error; return next; }
+      if (next.exceptions.some((item) => item.packageId === pkg.id && item.status === 'Open')) { next.error = 'Parcel already has an open exception.'; next.lastChange = next.error; return next; }
+      pkg.previousStatus = pkg.status;
+      pkg.status = 'Exception';
+      const shelf = next.shelves.find((item) => item.id === pkg.shelfId);
+      if (shelf && shelf.used > 0) shelf.used -= 1;
+      next.exceptions.push({ id: nextId('E', next.exceptions), packageId: pkg.id, type: action.exceptionType, description: action.description, status: 'Open', reportedBy: next.currentUser.id, createdAt: nowLabel(), resolvedAt: null });
+      addLog(next, 'EXCEPTION_REPORTED', `${pkg.trackingNo}: ${action.exceptionType}.`);
+      next.lastChange = `Exception reported for ${pkg.trackingNo}.`;
+      next.error = '';
+      return next;
+    }
+
+    case 'RESOLVE_EXCEPTION': {
+      const message = resolveExceptionState(next, action.id);
+      if (message.includes('not found')) next.error = message;
+      next.lastChange = message;
+      return next;
+    }
+
+    case 'ADD_SHELF': {
+      const code = String(action.code || '').trim().toUpperCase();
+      const capacity = Number(action.capacity);
+      if (!code || !Number.isInteger(capacity) || capacity < 1) { next.error = 'Shelf needs a code and positive capacity.'; next.lastChange = next.error; return next; }
+      if (next.shelves.some((item) => item.code === code)) { next.error = 'Shelf code already exists.'; next.lastChange = next.error; return next; }
+      next.shelves.push({ id: nextId('S', next.shelves), code, capacity, used: 0, status: 'Active' });
+      addLog(next, 'SHELF_CREATED', `${code} created.`);
+      next.lastChange = `Shelf ${code} created.`;
+      next.error = '';
+      return next;
+    }
+
+    case 'TOGGLE_SHELF': {
+      const shelf = next.shelves.find((item) => item.id === action.id);
+      if (!shelf) return next;
+      if (shelf.status === 'Active' && shelf.used > 0) { next.error = 'Occupied shelf cannot enter maintenance.'; next.lastChange = next.error; return next; }
+      shelf.status = shelf.status === 'Active' ? 'Maintenance' : 'Active';
+      addLog(next, 'SHELF_STATUS_CHANGED', `${shelf.code} is now ${shelf.status}.`);
+      next.lastChange = `${shelf.code} is now ${shelf.status}.`;
+      next.error = '';
+      return next;
+    }
+
+    case 'ADD_USER': {
+      const username = String(action.username || '').trim().toLowerCase();
+      const password = String(action.password || '').trim();
+      const name = String(action.name || '').trim();
+      const role = action.role;
+      if (!username || !password || !name || !['staff', 'admin', 'customer'].includes(role)) { next.error = 'Complete all user fields.'; next.lastChange = next.error; return next; }
+      if (next.users.some((item) => item.username === username)) { next.error = 'Username already exists.'; next.lastChange = next.error; return next; }
+      next.users.push({ id: nextId('U', next.users), username, password, name, role, phone: action.phone || '—' });
+      addLog(next, 'USER_CREATED', `${username} created with role ${role}.`);
+      next.lastChange = `User ${username} created.`;
+      next.error = '';
+      return next;
+    }
+
+    case 'SAVE_CONFIG': {
+      next.config = { siteName: action.siteName, siteCode: action.siteCode, address: action.address, phone: action.phone, notificationTemplate: action.notificationTemplate };
+      addLog(next, 'CONFIG_UPDATED', 'System configuration updated.');
+      next.lastChange = 'Configuration saved. The next notification will use the new template.';
+      next.error = '';
+      return next;
+    }
+
+    case 'START_SCENARIO': {
+      const reset = initialState();
+      if (action.scenario === 'happy') {
+        reset.currentUser = reset.users.find((user) => user.username === 'staff01');
+        reset.route = 'staff-detail';
+        reset.selectedPackageId = 'P2';
+        reset.lastChange = 'Happy path ready: notify P2, then complete pickup.';
+      } else if (action.scenario === 'illegal') {
+        reset.currentUser = reset.users.find((user) => user.username === 'staff01');
+        reset.route = 'staff-detail';
+        reset.selectedPackageId = 'P1';
+        reset.lastChange = 'Illegal transition ready: try to notify an Arrived parcel.';
+      } else {
+        reset.currentUser = reset.users.find((user) => user.username === 'cust01');
+        reset.route = 'customer-packages';
+        reset.lastChange = 'Customer isolation ready: cust01 cannot see cust02 parcel P5.';
+      }
+      return reset;
+    }
+
+    default:
+      return next;
+  }
+}
+
+let state = initialState();
+
+function escapeHtml(value) {
+  return String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
+}
+
+function badge(status) {
+  const cls = { Arrived: 'arrived', Shelved: 'shelved', Notified: 'notified', 'Picked Up': 'picked', Exception: 'exception' }[status] || 'shelved';
+  return `
+  <span class="badge badge-${cls}">${escapeHtml(status)}</span>
+  `;
+}
+
+function currentParcel() {
+  return state.packages.find((pkg) => pkg.id === state.selectedPackageId) || state.packages[0];
+}
+
+function visiblePackages() {
+  const base = state.currentUser?.role === 'customer' ? state.packages.filter((pkg) => pkg.customerId === state.currentUser.id) : state.packages;
+  if (!state.search) return base;
+  const query = state.search.toLowerCase();
+  return base.filter((pkg) => [pkg.trackingNo, pkg.recipientName, pkg.status, pkg.type].join(' ').toLowerCase().includes(query));
+}
+
+function metrics() {
+  return {
+    total: state.packages.length,
+    arrived: state.packages.filter((pkg) => pkg.status === 'Arrived').length,
+    notified: state.packages.filter((pkg) => pkg.status === 'Notified').length,
+    exceptions: state.packages.filter((pkg) => pkg.status === 'Exception').length,
+    used: state.shelves.reduce((sum, shelf) => sum + shelf.used, 0),
+    capacity: state.shelves.reduce((sum, shelf) => sum + shelf.capacity, 0)
+  };
+}
+function renderLogin() {
+  return `
+  <main class="login-shell">
+  	<section class="login-card">
+  		<div class="login-info">
+  			<div class="brand-mark">C</div>
+  			<h1>Cainiao Post LMS</h1>
+  			<p>Functional prototype: sign in, move a parcel through the lifecycle, and inspect every role page. All data lives in memory and resets on refresh.</p>
+  			<div class="scenario-box">
+  				<strong>Quick scenarios</strong>
+  				<div class="scenario-actions">
+  					<button class="btn btn-soft" data-scenario="happy">Happy path</button>
+  					<button class="btn btn-soft" data-scenario="illegal">Illegal transition</button>
+  					<button class="btn btn-soft" data-scenario="customer">Customer isolation</button>
+  				</div>
+  		</div>
+  </div>
+  <form class="login-form" data-form="login">
+  	<h2>Sign in</h2>${state.error ? `<div class="error-box">${escapeHtml(state.error)}</div>` : ''}<div class="field">
+  		<label for="login-username">Username</label>
+  		<input id="login-username" name="username" value="staff01" autocomplete="username">
+  	</div>
+  <div class="field">
+  	<label for="login-password">Password</label>
+  	<input id="login-password" name="password" type="password" value="123456" autocomplete="current-password">
+  </div>
+  <button class="btn btn-primary" type="submit">Sign in</button>
+  <div class="demo-users">${state.users.map((user) => `<div class="demo-user">
+  		<div>
+  			<strong>${escapeHtml(user.username)}</strong>
+  			<div class="state-row" style="border:0;padding:0">
+  				<span>${escapeHtml(user.role)}</span>
+  			</div>
+  	</div>
+  <button class="btn btn-soft" type="button" data-login-user="${escapeHtml(user.username)}">Use</button>
+  </div>`).join('')}</div>
+  </form>
+  </section>
+  </main>
+  `;
+}
+
+function navItems() {
+  if (state.currentUser.role === 'staff') return [['staff-dashboard','Dashboard'],['staff-packages','Parcels'],['staff-create','Receive'],['staff-shelves','Shelves'],['staff-exceptions','Exceptions']];
+  if (state.currentUser.role === 'admin') return [['admin-reports','Reports'],['admin-users','Users'],['admin-logs','Logs'],['admin-config','Config']];
+  return [['customer-packages','My parcels'],['customer-notifications','Notifications']];
+}
+
+function appShell(content) {
+  return `
+  <div class="app-shell">
+  	<aside class="sidebar">
+  		<div class="brand">
+  			<div class="brand-mark">C</div>
+  			<span>Cainiao LMS</span>
+  		</div>
+  	<nav class="nav">${navItems().map(([route,label]) => `<button class="${state.route === route ? 'active' : ''}" data-nav="${route}">
+  			<span>${label}</span>
+  			<span>›</span>
+  		</button>`).join('')}</nav>
+  <div class="sidebar-user">
+  	<strong>${escapeHtml(state.currentUser.name)}</strong>
+  	<div>${escapeHtml(state.currentUser.role)} · ${escapeHtml(state.currentUser.username)}</div>
+  	<button class="btn btn-soft" style="width:100%;margin-top:12px" data-action="LOGOUT">Sign out</button>
+  </div>
+  </aside>
+  <main class="main">${content}</main>
+  <aside class="state-panel">
+  	<h2>Current state</h2>
+  	<div class="state-list">
+  		<div class="state-row">
+  			<span>Current user</span>
+  			<strong>${escapeHtml(state.currentUser.name)}</strong>
+  		</div>
+  	<div class="state-row">
+  		<span>Role</span>
+  		<strong>${escapeHtml(state.currentUser.role)}</strong>
+  	</div>
+  <div class="state-row">
+  	<span>Page</span>
+  	<strong class="mono">${escapeHtml(state.route)}</strong>
+  </div>
+  <div class="state-row">
+  	<span>Packages</span>
+  	<strong>${state.packages.length}</strong>
+  </div>
+  <div class="state-row">
+  	<span>Users</span>
+  	<strong>${state.users.length}</strong>
+  </div>
+  <div class="state-row">
+  	<span>Shelf use</span>
+  	<strong>${metrics().used}/${metrics().capacity}</strong>
+  </div>
+  <div class="state-row">
+  	<span>Notifications</span>
+  	<strong>${state.notifications.length}</strong>
+  </div>
+  <div class="state-row">
+  	<span>Open exceptions</span>
+  	<strong>${state.exceptions.filter((item) => item.status === 'Open').length}</strong>
+  </div>
+  </div>
+  <div class="change-note">${escapeHtml(state.lastChange)}</div>
+  <div class="scenario-box">
+  	<strong>Quick scenarios</strong>
+  	<div class="scenario-actions">
+  		<button class="btn btn-soft" data-scenario="happy">Happy</button>
+  		<button class="btn btn-soft" data-scenario="illegal">Illegal</button>
+  		<button class="btn btn-soft" data-scenario="customer">Privacy</button>
+  	</div>
+  </div>
+  <button class="btn btn-soft" style="width:100%;margin-top:14px" data-action="RESET">Reset all data</button>
+  </aside>
+  </div>
+  `;
+}
+
+function pageHeader(title, subtitle, actions = '') {
+  return `
+  <header class="topbar">
+  	<div>
+  		<p>${escapeHtml(subtitle)}</p>
+  		<h1>${escapeHtml(title)}</h1>
+  	</div>
+  <div>${actions}</div>
+  </header>
+  `;
+}
+
+function metricsHtml() {
+  const m = metrics();
+  return `
+  <div class="metrics">${[['Total parcels',m.total],['Waiting for shelf',m.arrived],['Ready for pickup',m.notified],['Exceptions',m.exceptions]].map(([label,value]) => `<div class="metric">
+  		<span>${label}</span>
+  		<strong>${value}</strong>
+  	</div>`).join('')}</div>
+  `;
+}
+
+function packageTable(rows, selectable = true) {
+  return `
+  <div class="card">
+  	<div class="card-head">
+  		<h2>Parcel registry</h2>
+  		<span class="mono">${rows.length} records</span>
+  	</div>
+  <div class="table-wrap">
+  	<table>
+  		<thead>
+  			<tr>
+  				<th>Tracking</th>
+  				<th>Recipient</th>
+  				<th>Type</th>
+  				<th>Status</th>
+  				<th>Pickup code</th>
+  			</tr>
+  	</thead>
+  <tbody>${rows.map((pkg) => `<tr class="${selectable ? 'selectable' : ''} ${pkg.id === state.selectedPackageId ? 'selected' : ''}" ${selectable ? `data-select-package="${pkg.id}"` : ''}>
+  		<td class="mono">${pkg.trackingNo}</td>
+  		<td>${escapeHtml(pkg.recipientName)}</td>
+  		<td>${escapeHtml(pkg.type)}</td>
+  		<td>${badge(pkg.status)}</td>
+  		<td class="mono">${pkg.pickupCode || '—'}</td>
+  	</tr>`).join('') || `<tr>
+  	<td class="empty" colspan="5">No parcels found.</td>
+  </tr>`}</tbody>
+  </table>
+  </div>
+  </div>
+  `;
+}
+
+function timelineHtml(pkg) {
+  const events = [['Arrived', pkg.arrivedAt]];
+  if (pkg.shelvedAt) events.push(['Shelved', pkg.shelvedAt]);
+  if (pkg.notifiedAt) events.push(['Notified', pkg.notifiedAt]);
+  if (pkg.pickedUpAt) events.push(['Picked Up', pkg.pickedUpAt]);
+  if (pkg.status === 'Exception') events.push(['Exception', 'Current exception']);
+  return `
+  <div class="timeline">${events.map(([label,time]) => `<div class="timeline-item">
+  		<div class="dot">
+  		</div>
+  	<div>
+  		<strong>${escapeHtml(label)}</strong>
+  		<div class="state-row" style="border:0;padding:0">
+  			<span>${escapeHtml(time || '—')}</span>
+  		</div>
+  </div>
+  </div>`).join('')}</div>
+  `;
+}
+
+function packageDetail() {
+  const pkg = currentParcel();
+  const shelfSelect = state.shelves.filter((shelf) => shelf.status === 'Active' && shelf.used < shelf.capacity).map((shelf) => `<option value="${shelf.id}">${shelf.code} · ${shelf.used}/${shelf.capacity}</option>`).join('');
+  const actions = pkg.status === 'Arrived'
+    ? `<form data-form="shelve" data-id="${pkg.id}" class="form-grid" style="margin-top:14px"><div class="field wide"><label>Assign shelf</label><select name="shelfId">${shelfSelect}</select></div><button class="btn btn-primary wide" type="submit">Assign shelf</button></form>`
+    : pkg.status === 'Shelved'
+      ? `<button class="btn btn-primary" style="margin-top:14px" data-action="NOTIFY" data-id="${pkg.id}">Notify customer</button>`
+      : pkg.status === 'Notified'
+        ? `<button class="btn btn-success" style="margin-top:14px" data-action="PICKUP" data-id="${pkg.id}">Confirm pickup</button>`
+        : pkg.status === 'Exception'
+          ? '<div class="error-box" style="margin-top:14px">Parcel is in exception handling.</div>'
+          : '<div class="success-box" style="margin-top:14px">Parcel completed.</div>';
+  return `
+  ${pageHeader(pkg.trackingNo, 'Parcel detail', '<button class="btn btn-soft" data-nav="staff-packages">Back to parcels</button>')}<div class="grid-2">
+  	<section class="card">
+  		<div class="card-head">
+  			<h2>Parcel information</h2>${badge(pkg.status)}</div>
+  		<div class="card-body">
+  			<div class="grid-2">
+  				<div class="field">
+  					<label>Recipient</label>
+  					<strong>${escapeHtml(pkg.recipientName)}</strong>
+  				</div>
+  			<div class="field">
+  				<label>Type</label>
+  				<strong>${escapeHtml(pkg.type)}</strong>
+  			</div>
+  		<div class="field">
+  			<label>Weight</label>
+  			<strong>${pkg.weight} kg</strong>
+  		</div>
+  	<div class="field">
+  		<label>Shelf</label>
+  		<strong>${state.shelves.find((shelf) => shelf.id === pkg.shelfId)?.code || '—'}</strong>
+  	</div>
+  <div class="field wide">
+  	<label>Pickup code</label>
+  	<strong class="mono" style="font-size:24px">${pkg.pickupCode || '—'}</strong>
+  </div>
+  </div>${actions}</div>
+  </section>
+  <section class="card">
+  	<div class="card-head">
+  		<h2>Tracking timeline</h2>
+  	</div>
+  <div class="card-body">${timelineHtml(pkg)}<div class="scenario-box">
+  		<strong>Prototype transition probes</strong>
+  		<p class="state-row" style="border:0;padding:0">
+  			<span>These buttons intentionally bypass the UI and let the reducer accept or reject the action.</span>
+  		</p>
+  	<div class="scenario-actions">
+  		<button class="btn btn-soft" data-action="NOTIFY" data-id="${pkg.id}">Try Notify</button>
+  		<button class="btn btn-soft" data-action="PICKUP" data-id="${pkg.id}">Try Pickup</button>
+  	</div>
+  </div>
+  </div>
+  </section>
+  </div>
+  `;
+}
+
+function renderStaffDashboard() {
+  const recent = [...state.packages].slice(0, 4);
+  return `
+  ${pageHeader('Staff dashboard','Station operations', '<button class="btn btn-primary" data-nav="staff-create">Receive parcel</button>')}${metricsHtml()}<div class="grid-2">${packageTable(recent)}<section class="card">
+  		<div class="card-head">
+  			<h2>Quick actions</h2>
+  		</div>
+  	<div class="card-body">
+  		<div class="grid-2">
+  			<button class="btn btn-soft" data-nav="staff-packages">View parcels</button>
+  			<button class="btn btn-soft" data-nav="staff-shelves">Manage shelves</button>
+  			<button class="btn btn-soft" data-nav="staff-exceptions">Handle exceptions</button>
+  			<button class="btn btn-primary" data-nav="staff-create">Receive parcel</button>
+  		</div>
+  </div>
+  </section>
+  </div>
+  `;
+}
+
+function renderStaffPackages() {
+  const rows = visiblePackages();
+  return `
+  ${pageHeader('Parcels','Search and open parcel records', '<button class="btn btn-primary" data-nav="staff-create">Receive parcel</button>')}<form class="card card-body form-grid" data-form="search-packages" style="margin-bottom:16px">
+  	<div class="field wide">
+  		<label>Search tracking, recipient, status or type</label>
+  		<input name="q" value="${escapeHtml(state.search)}" placeholder="HK-1002">
+  	</div>
+  <button class="btn btn-soft" type="submit">Search</button>
+  </form>${packageTable(rows)}
+  `;
+}
+function renderStaffCreate() {
+  const customers = state.users.filter((user) => user.role === 'customer').map((user) => `<option value="${user.id}">${escapeHtml(user.name)} (${escapeHtml(user.username)})</option>`).join('');
+  return `
+  ${pageHeader('Receive parcels','Create one parcel or batch intake')}<div class="grid-2">
+  	<section class="card">
+  		<div class="card-head">
+  			<h2>Single parcel</h2>
+  		</div>
+  	<div class="card-body">
+  		<form class="form-grid" data-form="create-package">
+  			<div class="field">
+  				<label>Tracking number</label>
+  				<input name="trackingNo" required placeholder="HK-3001">
+  			</div>
+  		<div class="field">
+  			<label>Customer</label>
+  			<select name="customerId">${customers}</select>
+  		</div>
+  	<div class="field">
+  		<label>Recipient name</label>
+  		<input name="recipientName" required value="Chan Tai Man">
+  	</div>
+  <div class="field">
+  	<label>Weight (kg)</label>
+  	<input name="weight" type="number" min="0.1" step="0.1" required value="1.5">
+  </div>
+  <div class="field">
+  	<label>Type</label>
+  	<select name="type">
+  		<option>Parcel</option>
+  		<option>Document</option>
+  		<option>Fragile</option>
+  		<option>Bulky</option>
+  	</select>
+  </div>
+  <button class="btn btn-primary" type="submit">Receive parcel</button>
+  </form>
+  </div>
+  </section>
+  <section class="card">
+  	<div class="card-head">
+  		<h2>Batch intake</h2>
+  	</div>
+  <div class="card-body">
+  	<form data-form="batch-create">
+  		<div class="field">
+  			<label>Customer</label>
+  			<select name="customerId">${customers}</select>
+  		</div>
+  	<div class="field" style="margin-top:12px">
+  		<label>One row: tracking | recipient | weight | type</label>
+  		<textarea name="batch" rows="7" placeholder="HK-3002 | Chan Tai Man | 2.0 | Parcel">
+  		</textarea>
+  </div>
+  <button class="btn btn-soft" type="submit" style="margin-top:12px">Receive batch</button>
+  </form>
+  </div>
+  </section>
+  </div>
+  `;
+}
+
+function renderStaffShelves() {
+  return `
+  ${pageHeader('Shelf management','Capacity and maintenance')}<div class="grid-2">
+  	<section class="card">
+  		<div class="card-head">
+  			<h2>Shelves</h2>
+  		</div>
+  	<div class="card-body">${state.shelves.map((shelf) => `<div class="shelf-row">
+  			<div>
+  				<strong>${shelf.code}</strong>
+  				<div class="state-row" style="border:0;padding:0">
+  					<span>${shelf.used}/${shelf.capacity} used</span>
+  				</div>
+  		</div>
+  	<span>${shelf.status}</span>
+  	<div>${shelf.used}/${shelf.capacity}</div>
+  	<button class="btn btn-soft" data-action="TOGGLE_SHELF" data-id="${shelf.id}">${shelf.status === 'Active' ? 'Maintenance' : 'Activate'}</button>
+  </div>`).join('')}</div>
+  </section>
+  <section class="card">
+  	<div class="card-head">
+  		<h2>Add shelf</h2>
+  	</div>
+  <div class="card-body">
+  	<form class="form-grid" data-form="add-shelf">
+  		<div class="field">
+  			<label>Code</label>
+  			<input name="code" required placeholder="S-C-01">
+  		</div>
+  	<div class="field">
+  		<label>Capacity</label>
+  		<input name="capacity" type="number" min="1" required value="5">
+  	</div>
+  <button class="btn btn-primary" type="submit">Create shelf</button>
+  </form>
+  </div>
+  </section>
+  </div>
+  `;
+}
+
+function renderStaffExceptions() {
+  const eligible = state.packages.filter((pkg) => eligibleForException(pkg) && !state.exceptions.some((item) => item.packageId === pkg.id && item.status === 'Open'));
+  return `
+  ${pageHeader('Exception parcels','Report and resolve problem parcels')}<div class="grid-2">
+  	<section class="card">
+  		<div class="card-head">
+  			<h2>Report exception</h2>
+  		</div>
+  	<div class="card-body">
+  		<form data-form="report-exception">
+  			<div class="field">
+  				<label>Parcel</label>
+  				<select name="packageId">${eligible.map((pkg) => `<option value="${pkg.id}">${pkg.trackingNo} · ${pkg.status}</option>`).join('')}</select>
+  			</div>
+  		<div class="field" style="margin-top:12px">
+  			<label>Issue type</label>
+  			<select name="exceptionType">
+  				<option>Damaged</option>
+  				<option>Lost</option>
+  				<option>Address issue</option>
+  				<option>Refused</option>
+  			</select>
+  	</div>
+  <div class="field" style="margin-top:12px">
+  	<label>Description</label>
+  	<textarea name="description" rows="4" required>
+  	</textarea>
+  </div>
+  <button class="btn btn-danger" type="submit" style="margin-top:12px">Report exception</button>
+  </form>
+  </div>
+  </section>
+  <section class="card">
+  	<div class="card-head">
+  		<h2>Exception register</h2>
+  	</div>
+  <div class="card-body">${state.exceptions.map((item) => { const pkg = state.packages.find((p) => p.id === item.packageId); return `<div class="state-row">
+  		<span>
+  			<strong>${pkg?.trackingNo || 'Unknown'}</strong>
+  			<br>${escapeHtml(item.type)} · ${escapeHtml(item.description)}</span>
+  		<span>${item.status === 'Open' ? `<button class="btn btn-success" data-action="RESOLVE_EXCEPTION" data-id="${item.id}">Resolve</button>` : 'Resolved'}</span>
+  	</div>`; }).join('')}</div>
+  </section>
+  </div>
+  `;
+}
+
+function renderCustomerPackages() {
+  const rows = visiblePackages();
+  return `
+  ${pageHeader('My parcels','Read-only customer view', '<button class="btn btn-soft" data-nav="customer-notifications">Notifications</button>')}<div class="parcel-cards">${rows.map((pkg) => `<article class="parcel-card">
+  		<div class="card-head" style="padding:0;border:0">
+  			<h3 class="mono">${pkg.trackingNo}</h3>${badge(pkg.status)}</div>
+  		<p>${escapeHtml(pkg.type)} · ${pkg.weight} kg</p>
+  		<div class="code">${pkg.pickupCode || '—'}</div>
+  		<button class="btn btn-primary" data-select-package="${pkg.id}">View tracking</button>
+  	</article>`).join('') || '<div class="empty">No parcels for this customer.</div>'}</div>
+  `;
+}
+
+function renderCustomerDetail() {
+  const pkg = currentParcel();
+  return `
+  ${pageHeader(pkg.trackingNo,'Customer parcel detail','<button class="btn btn-soft" data-nav="customer-packages">Back</button>')}<div class="grid-2">
+  	<section class="card">
+  		<div class="card-head">
+  			<h2>Parcel details</h2>${badge(pkg.status)}</div>
+  		<div class="card-body">
+  			<div class="field">
+  				<label>Pickup code</label>
+  				<div class="code">${pkg.pickupCode || '—'}</div>
+  			</div>
+  		<div class="grid-2">
+  			<div class="field">
+  				<label>Recipient</label>
+  				<strong>${escapeHtml(pkg.recipientName)}</strong>
+  			</div>
+  		<div class="field">
+  			<label>Weight</label>
+  			<strong>${pkg.weight} kg</strong>
+  		</div>
+  	<div class="field">
+  		<label>Type</label>
+  		<strong>${escapeHtml(pkg.type)}</strong>
+  	</div>
+  </div>
+  </div>
+  </section>
+  <section class="card">
+  	<div class="card-head">
+  		<h2>Timeline</h2>
+  	</div>
+  <div class="card-body">${timelineHtml(pkg)}<div class="scenario-box">
+  		<strong>Prototype transition probes</strong>
+  		<p class="state-row" style="border:0;padding:0">
+  			<span>These buttons intentionally bypass the UI and let the reducer accept or reject the action.</span>
+  		</p>
+  	<div class="scenario-actions">
+  		<button class="btn btn-soft" data-action="NOTIFY" data-id="${pkg.id}">Try Notify</button>
+  		<button class="btn btn-soft" data-action="PICKUP" data-id="${pkg.id}">Try Pickup</button>
+  	</div>
+  </div>
+  </div>
+  </section>
+  </div>
+  `;
+}
+
+function renderCustomerNotifications() {
+  const items = state.notifications.filter((item) => item.userId === state.currentUser.id);
+  return `
+  ${pageHeader('Notifications','Messages linked to your parcels','<button class="btn btn-soft" data-nav="customer-packages">My parcels</button>')}<div class="card">${items.map((item) => `<div class="card-body" style="border-bottom:1px solid var(--line)">
+  		<strong>${escapeHtml(item.title)}</strong>
+  		<p>${escapeHtml(item.content)}</p>
+  		<div class="state-row" style="border:0;padding:0">
+  			<span>${escapeHtml(item.createdAt)}</span>
+  			<button class="btn btn-soft" data-select-package="${item.packageId}">View parcel</button>
+  		</div>
+  </div>`).join('') || '<div class="empty">No notifications.</div>'}</div>
+  `;
+}
+
+function renderAdminReports() {
+  const counts = ['Arrived','Shelved','Notified','Picked Up','Exception'].map((status) => [status,state.packages.filter((pkg) => pkg.status === status).length]);
+  const chart = [1,0,1,2,0,1,0];
+  return `
+  ${pageHeader('Reports','System overview')}${metricsHtml()}<div class="grid-2">
+  	<section class="card">
+  		<div class="card-head">
+  			<h2>Daily inbound</h2>
+  		</div>
+  	<div class="card-body">
+  		<div class="chart">${chart.map((value) => `<div class="bar" style="height:${Math.max(8,value * 45)}%">
+  			</div>`).join('')}</div>
+  </div>
+  </section>
+  <section class="card">
+  	<div class="card-head">
+  		<h2>Status breakdown</h2>
+  	</div>
+  <div class="card-body">${counts.map(([status,count]) => `<div class="state-row">
+  		<span>${status}</span>
+  		<strong>${count}</strong>
+  	</div>`).join('')}</div>
+  </section>
+  </div>
+  `;
+}
+
+function renderAdminUsers() {
+  return `
+  ${pageHeader('User management','Create and inspect accounts')}<div class="grid-2">
+  	<section class="card">
+  		<div class="card-head">
+  			<h2>Users</h2>
+  		</div>
+  	<div class="table-wrap">
+  		<table>
+  			<thead>
+  				<tr>
+  					<th>Username</th>
+  					<th>Name</th>
+  					<th>Role</th>
+  					<th>Phone</th>
+  				</tr>
+  		</thead>
+  	<tbody>${state.users.map((user) => `<tr>
+  			<td class="mono">${user.username}</td>
+  			<td>${escapeHtml(user.name)}</td>
+  			<td>${escapeHtml(user.role)}</td>
+  			<td>${escapeHtml(user.phone)}</td>
+  		</tr>`).join('')}</tbody>
+  </table>
+  </div>
+  </section>
+  <section class="card">
+  	<div class="card-head">
+  		<h2>Add user</h2>
+  	</div>
+  <div class="card-body">
+  	<form class="form-grid" data-form="add-user">
+  		<div class="field">
+  			<label>Username</label>
+  			<input name="username" required>
+  		</div>
+  	<div class="field">
+  		<label>Password</label>
+  		<input name="password" value="123456" required>
+  	</div>
+  <div class="field">
+  	<label>Name</label>
+  	<input name="name" required>
+  </div>
+  <div class="field">
+  	<label>Phone</label>
+  	<input name="phone" value="+852 9000 9999">
+  </div>
+  <div class="field">
+  	<label>Role</label>
+  	<select name="role">
+  		<option>staff</option>
+  		<option>admin</option>
+  		<option>customer</option>
+  	</select>
+  </div>
+  <button class="btn btn-primary" type="submit">Create user</button>
+  </form>
+  </div>
+  </section>
+  </div>
+  `;
+}
+
+function renderAdminLogs() {
+  return `
+  ${pageHeader('Operation logs','Every prototype write action')}<section class="card">
+  	<div class="card-head">
+  		<h2>Audit stream</h2>
+  		<span class="mono">${state.logs.length} entries</span>
+  	</div>
+  <div class="table-wrap">
+  	<table>
+  		<thead>
+  			<tr>
+  				<th>Time</th>
+  				<th>Actor</th>
+  				<th>Action</th>
+  				<th>Detail</th>
+  			</tr>
+  	</thead>
+  <tbody>${[...state.logs].reverse().map((log) => `<tr>
+  		<td>${escapeHtml(log.createdAt)}</td>
+  		<td>${escapeHtml(log.username)}</td>
+  		<td class="mono">${escapeHtml(log.action)}</td>
+  		<td>${escapeHtml(log.detail)}</td>
+  	</tr>`).join('')}</tbody>
+  </table>
+  </div>
+  </section>
+  `;
+}
+
+function renderAdminConfig() {
+  return `
+  ${pageHeader('System configuration','Site and notification behavior')}<section class="card">
+  	<div class="card-body">
+  		<form class="form-grid" data-form="save-config">
+  			<div class="field">
+  				<label>Site name</label>
+  				<input name="siteName" value="${escapeHtml(state.config.siteName)}" required>
+  			</div>
+  		<div class="field">
+  			<label>Site code</label>
+  			<input name="siteCode" value="${escapeHtml(state.config.siteCode)}" required>
+  		</div>
+  	<div class="field">
+  		<label>Address</label>
+  		<input name="address" value="${escapeHtml(state.config.address)}" required>
+  	</div>
+  <div class="field">
+  	<label>Phone</label>
+  	<input name="phone" value="${escapeHtml(state.config.phone)}" required>
+  </div>
+  <div class="field wide">
+  	<label>Notification template</label>
+  	<textarea name="notificationTemplate" rows="4" required>${escapeHtml(state.config.notificationTemplate)}</textarea>
+  </div>
+  <button class="btn btn-primary" type="submit">Save configuration</button>
+  </form>
+  </div>
+  </section>
+  `;
+}
+
+function renderPage() {
+  if (state.route === 'staff-dashboard') return renderStaffDashboard();
+  if (state.route === 'staff-packages') return renderStaffPackages();
+  if (state.route === 'staff-create') return renderStaffCreate();
+  if (state.route === 'staff-detail') return packageDetail();
+  if (state.route === 'staff-shelves') return renderStaffShelves();
+  if (state.route === 'staff-exceptions') return renderStaffExceptions();
+  if (state.route === 'customer-packages') return renderCustomerPackages();
+  if (state.route === 'customer-detail') return renderCustomerDetail();
+  if (state.route === 'customer-notifications') return renderCustomerNotifications();
+  if (state.route === 'admin-reports') return renderAdminReports();
+  if (state.route === 'admin-users') return renderAdminUsers();
+  if (state.route === 'admin-logs') return renderAdminLogs();
+  if (state.route === 'admin-config') return renderAdminConfig();
+  return '<div class="empty">Page not found.</div>';
+}
+
+function render() {
+  const root = document.querySelector('#app');
+  root.innerHTML = state.currentUser ? appShell(renderPage()) : renderLogin();
+  if (state.error && state.currentUser && state.route !== 'staff-create') {
+    const notice = document.createElement('div');
+    notice.className = 'error-box';
+    notice.textContent = state.error;
+    root.querySelector('.main')?.prepend(notice);
+  }
+  root.querySelectorAll('.field').forEach((field, index) => {
+    const control = field.querySelector('input, select, textarea');
+    const label = field.querySelector('label');
+    if (!control || !label) return;
+    if (!control.id) control.id = `prototype-field-${index}`;
+    label.htmlFor = control.id;
+  });
+}
+
+function showToast(message) {
+  const toast = document.querySelector('#toast');
+  toast.textContent = message;
+  toast.classList.add('show');
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => toast.classList.remove('show'), 2300);
+}
+
+function dispatch(action) {
+  state = reducer(state, action);
+  render();
+  if (action.type !== 'NAVIGATE' && action.type !== 'SELECT_PACKAGE') {
+    showToast(state.error || state.lastChange);
+  }
+}
+
+const sourceFunctions = {
+  renderLogin,
+  appShell,
+  renderStaffDashboard,
+  renderStaffPackages,
+  renderStaffCreate,
+  packageDetail,
+  renderStaffShelves,
+  renderStaffExceptions,
+  renderCustomerPackages,
+  renderCustomerDetail,
+  renderCustomerNotifications,
+  renderAdminReports,
+  renderAdminUsers,
+  renderAdminLogs,
+  renderAdminConfig,
+  renderPage
+};
+
+let activeSourceTab = 'renderLogin';
+
+function formatFunctionSource(fn) {
+  return fn.toString().replace(/\n{3,}/g, '\n\n');
+}
+
+function openSourcePanel(name = activeSourceTab) {
+  activeSourceTab = name;
+  const panel = document.querySelector('#source-panel');
+  const tabs = document.querySelector('#source-tabs');
+  const code = document.querySelector('#source-code');
+  if (!panel || !tabs || !code) return;
+  tabs.innerHTML = Object.keys(sourceFunctions)
+    .map((key) => `<button class="source-tab ${key === activeSourceTab ? 'active' : ''}" data-source-tab="${key}">${key}</button>`)
+    .join('');
+  code.textContent = formatFunctionSource(sourceFunctions[activeSourceTab]);
+  panel.classList.add('open');
+  panel.setAttribute('aria-hidden', 'false');
+}
+
+document.addEventListener('click', (event) => {
+  const login = event.target.closest('[data-login-user]');
+  if (login) return dispatch({ type: 'LOGIN', username: login.dataset.loginUser, password: '123456' });
+  const scenario = event.target.closest('[data-scenario]');
+  if (scenario) return dispatch({ type: 'START_SCENARIO', scenario: scenario.dataset.scenario });
+  const nav = event.target.closest('[data-nav]');
+  if (nav) return dispatch({ type: 'NAVIGATE', route: nav.dataset.nav });
+  const select = event.target.closest('[data-select-package]');
+  if (select) return dispatch({ type: 'SELECT_PACKAGE', packageId: select.dataset.selectPackage });
+  const action = event.target.closest('[data-action]');
+  if (action) {
+    const type = action.dataset.action;
+    const id = action.dataset.id;
+    if (type === 'NOTIFY' || type === 'PICKUP') return dispatch({ type, packageId: id });
+    return dispatch({ type, id });
+  }
+  if (event.target.closest('[data-source-toggle]')) return openSourcePanel();
+  const tab = event.target.closest('[data-source-tab]');
+  if (tab) return openSourcePanel(tab.dataset.sourceTab);
+  if (event.target.closest('[data-source-close]')) {
+    const panel = document.querySelector('#source-panel');
+    panel?.classList.remove('open');
+    panel?.setAttribute('aria-hidden', 'true');
+    return;
+  }
+  if (event.target.closest('[data-source-copy]')) {
+    const text = document.querySelector('#source-code')?.textContent || '';
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text)
+        .then(() => showToast('Function source copied.'))
+        .catch(() => showToast('Copy was blocked by the browser.'));
+    }
+  }
+});
+
+document.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const form = event.target;
+  const data = Object.fromEntries(new FormData(form).entries());
+  if (form.dataset.form === 'login') return dispatch({ type: 'LOGIN', ...data });
+  if (form.dataset.form === 'search-packages') return dispatch({ type: 'SET_SEARCH', search: data.q });
+  if (form.dataset.form === 'create-package') return dispatch({ type: 'CREATE_PACKAGE', ...data });
+  if (form.dataset.form === 'batch-create') return dispatch({ type: 'BATCH_CREATE', ...data });
+  if (form.dataset.form === 'shelve') return dispatch({ type: 'SHELVE', packageId: form.dataset.id, shelfId: data.shelfId });
+  if (form.dataset.form === 'add-shelf') return dispatch({ type: 'ADD_SHELF', ...data });
+  if (form.dataset.form === 'report-exception') return dispatch({ type: 'REPORT_EXCEPTION', ...data });
+  if (form.dataset.form === 'add-user') return dispatch({ type: 'ADD_USER', ...data });
+  if (form.dataset.form === 'save-config') return dispatch({ type: 'SAVE_CONFIG', ...data });
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key !== 'Escape') return;
+  const panel = document.querySelector('#source-panel');
+  panel?.classList.remove('open');
+  panel?.setAttribute('aria-hidden', 'true');
+});
+
+render();
+</script>
+</body>
+</html>

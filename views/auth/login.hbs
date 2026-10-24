@@ -1,0 +1,53 @@
+﻿<div class="row justify-content-center my-5">
+  <div class="col-md-6 col-lg-5">
+    <div class="card shadow border-0">
+      <div class="card-body p-4">
+        <div class="text-center mb-4">
+          <h1 class="h3 fw-bold text-dark">Cainiao LMS</h1>
+          <p class="text-muted small">Hong Kong Station Management System</p>
+        </div>
+
+        <form action="/login" method="POST" class="mb-4">
+          <div class="field mb-3">
+            <label for="username" class="form-label fw-semibold">Username</label>
+            <input type="text" id="username" name="username" class="form-control" placeholder="Enter username" required>
+          </div>
+          <div class="field mb-3">
+            <label for="password" class="form-label fw-semibold">Password</label>
+            <input type="password" id="password" name="password" class="form-control" placeholder="Enter password" required>
+          </div>
+          <button type="submit" class="btn btn-brand w-100 py-2 fw-bold">Sign In</button>
+        </form>
+
+        <div class="demo-user mt-4">
+          <h2 class="h6 fw-bold text-dark mb-2">Quick Sign-in (Demo Helper)</h2>
+          <p class="text-muted small mb-3">Select a role to test without entering a password:</p>
+          <div class="d-flex flex-column gap-2">
+            <form action="/demo/login" method="POST">
+              <input type="hidden" name="username" value="staff01">
+              <button type="submit" class="btn btn-soft w-100 text-start d-flex justify-content-between align-items-center">
+                <span><strong>Station Staff</strong> (staff01)</span>
+                <span class="badge bg-primary">Staff</span>
+              </button>
+            </form>
+            <form action="/demo/login" method="POST">
+              <input type="hidden" name="username" value="admin01">
+              <button type="submit" class="btn btn-soft w-100 text-start d-flex justify-content-between align-items-center">
+                <span><strong>Administrator</strong> (admin01)</span>
+                <span class="badge bg-dark">Admin</span>
+              </button>
+            </form>
+            <form action="/demo/login" method="POST">
+              <input type="hidden" name="username" value="cust01">
+              <button type="submit" class="btn btn-soft w-100 text-start d-flex justify-content-between align-items-center">
+                <span><strong>Customer</strong> (cust01)</span>
+                <span class="badge bg-success">Customer</span>
+              </button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

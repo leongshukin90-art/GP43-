@@ -1,0 +1,32 @@
+﻿{{!-- Rendered by utils/stub.js while a page is still a placeholder.
+     Delete the {{> stub}} line from the page once you build it for real. --}}
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-4 p-md-5">
+    <span class="badge text-bg-warning mb-3">Not implemented — HTTP 501</span>
+    <h1 class="h4 mb-1">{{stub.title}}</h1>
+    <p class="text-secondary"><code>{{stub.method}} {{stub.path}}</code></p>
+
+    <p class="detail-label mb-1">Owner</p>
+    <p class="detail-value mb-4">{{stub.owner}}</p>
+
+    {{#if stub.needs}}
+      <p class="detail-label mb-1">What this page must do</p>
+      <ul class="mb-4">
+        {{#each stub.needs}}<li>{{this}}</li>{{/each}}
+      </ul>
+    {{/if}}
+
+    {{#if stub.rules}}
+      <p class="detail-label mb-1">Rules you must not break</p>
+      <ul class="mb-4">
+        {{#each stub.rules}}<li>{{this}}</li>{{/each}}
+      </ul>
+    {{/if}}
+
+    <p class="text-secondary small mb-0">
+      The route path and this template name are already correct, so you only have to
+      fill in the behaviour. See <code>docs/module-map.md</code> and
+      <code>docs/actions_of_roles/</code> for the full task.
+    </p>
+  </div>
+</div>

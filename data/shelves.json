@@ -1,0 +1,42 @@
+[
+  {
+    "id": "SHELF-0001",
+    "code": "S-A-01",
+    "cabinet": "Zone A · Cabinet 1",
+    "capacity": 30,
+    "used": 2,
+    "status": "Active"
+  },
+  {
+    "id": "SHELF-0002",
+    "code": "S-A-02",
+    "cabinet": "Zone A · Cabinet 2",
+    "capacity": 30,
+    "used": 2,
+    "status": "Active"
+  },
+  {
+    "id": "SHELF-0003",
+    "code": "S-B-01",
+    "cabinet": "Zone B · Cabinet 1",
+    "capacity": 24,
+    "used": 0,
+    "status": "Active"
+  },
+  {
+    "id": "SHELF-0004",
+    "code": "S-B-02",
+    "cabinet": "Zone B · Cabinet 2",
+    "capacity": 24,
+    "used": 1,
+    "status": "Active"
+  },
+  {
+    "id": "SHELF-0005",
+    "code": "S-C-01",
+    "cabinet": "Oversize storage",
+    "capacity": 12,
+    "used": 0,
+    "status": "Active"
+  }
+]

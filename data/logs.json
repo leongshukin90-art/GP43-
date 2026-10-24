@@ -1,0 +1,194 @@
+[
+  {
+    "id": "LOG-0001",
+    "action": "LOGIN",
+    "userId": "USR-0002",
+    "username": "admin01",
+    "detail": "User signed in.",
+    "createdAt": "2026-09-28T01:00:00.000Z"
+  },
+  {
+    "id": "LOG-0002",
+    "action": "CONFIG_UPDATED",
+    "userId": "USR-0002",
+    "username": "admin01",
+    "detail": "System configuration updated.",
+    "createdAt": "2026-09-28T01:08:00.000Z"
+  },
+  {
+    "id": "LOG-0003",
+    "action": "PACKAGE_SHELVED",
+    "userId": "USR-0001",
+    "username": "staff01",
+    "detail": "CAINIAO-HK-1003 placed on S-A-01.",
+    "createdAt": "2026-09-29T04:20:00.000Z"
+  },
+  {
+    "id": "LOG-0004",
+    "action": "PACKAGE_NOTIFIED",
+    "userId": "USR-0001",
+    "username": "staff01",
+    "detail": "CAINIAO-HK-1003 pickup notification generated.",
+    "createdAt": "2026-09-29T04:45:00.000Z"
+  },
+  {
+    "id": "LOG-0005",
+    "action": "EXCEPTION_REPORTED",
+    "userId": "USR-0001",
+    "username": "staff01",
+    "detail": "CAINIAO-HK-1005: Damaged packaging.",
+    "createdAt": "2026-09-29T06:40:00.000Z"
+  },
+  {
+    "id": "LOG-0006",
+    "action": "PACKAGE_PICKED_UP",
+    "userId": "USR-0001",
+    "username": "staff01",
+    "detail": "CAINIAO-HK-1004 picked up.",
+    "createdAt": "2026-09-24T04:05:00.000Z"
+  },
+  {
+    "id": "LOG-0007",
+    "action": "PACKAGE_SHELVED",
+    "userId": "USR-0001",
+    "username": "staff01",
+    "detail": "CAINIAO-HK-1006 placed on S-A-02.",
+    "createdAt": "2026-09-30T03:00:00.000Z"
+  },
+  {
+    "id": "LOG-0008",
+    "action": "PACKAGE_NOTIFIED",
+    "userId": "USR-0001",
+    "username": "staff01",
+    "detail": "CAINIAO-HK-1006 pickup notification generated.",
+    "createdAt": "2026-09-30T03:30:00.000Z"
+  },
+  {
+    "id": "LOG-0009",
+    "action": "PACKAGE_SHELVED",
+    "userId": "USR-0001",
+    "username": "staff01",
+    "detail": "CAINIAO-HK-1010 placed on S-A-02.",
+    "createdAt": "2026-10-01T00:10:00.000Z"
+  },
+  {
+    "id": "LOG-0010",
+    "action": "PACKAGE_NOTIFIED",
+    "userId": "USR-0001",
+    "username": "staff01",
+    "detail": "CAINIAO-HK-1010 pickup notification generated.",
+    "createdAt": "2026-10-01T00:35:00.000Z"
+  },
+  {
+    "id": "LOG-0011",
+    "action": "LOGIN",
+    "userId": "USR-0001",
+    "username": "staff01",
+    "detail": "User signed in.",
+    "createdAt": "2026-10-01T16:03:38.887Z"
+  },
+  {
+    "id": "LOG-0012",
+    "action": "LOGIN",
+    "userId": "USR-0002",
+    "username": "admin01",
+    "detail": "User signed in.",
+    "createdAt": "2026-10-01T16:08:34.439Z"
+  },
+  {
+    "id": "LOG-0013",
+    "action": "LOGIN",
+    "userId": "USR-0002",
+    "username": "admin01",
+    "detail": "User signed in.",
+    "createdAt": "2026-10-01T16:08:45.685Z"
+  },
+  {
+    "id": "LOG-0014",
+    "action": "LOGIN",
+    "userId": "USR-0001",
+    "username": "staff01",
+    "detail": "User signed in.",
+    "createdAt": "2026-10-01T16:10:27.852Z"
+  },
+  {
+    "id": "LOG-0015",
+    "action": "LOGIN",
+    "userId": "USR-0003",
+    "username": "cust01",
+    "detail": "User signed in.",
+    "createdAt": "2026-10-01T16:12:14.849Z"
+  },
+  {
+    "id": "LOG-0016",
+    "action": "LOGIN",
+    "userId": "USR-0001",
+    "username": "staff01",
+    "detail": "User signed in.",
+    "createdAt": "2026-10-01T16:20:14.220Z"
+  },
+  {
+    "id": "LOG-0017",
+    "action": "LOGIN",
+    "userId": "USR-0001",
+    "username": "staff01",
+    "detail": "User signed in.",
+    "createdAt": "2026-10-03T09:00:21.693Z"
+  },
+  {
+    "id": "LOG-0018",
+    "action": "LOGIN",
+    "userId": "USR-0001",
+    "username": "staff01",
+    "detail": "User signed in.",
+    "createdAt": "2026-10-03T09:42:21.617Z"
+  },
+  {
+    "id": "LOG-0019",
+    "action": "LOGIN",
+    "userId": "USR-0001",
+    "username": "staff01",
+    "detail": "User signed in.",
+    "createdAt": "2026-10-03T09:42:35.872Z"
+  },
+  {
+    "id": "LOG-0020",
+    "action": "LOGIN",
+    "userId": "USR-0001",
+    "username": "staff01",
+    "detail": "User signed in.",
+    "createdAt": "2026-10-03T09:49:13.363Z"
+  },
+  {
+    "id": "LOG-0021",
+    "action": "LOGIN",
+    "userId": "USR-0001",
+    "username": "staff01",
+    "detail": "User signed in.",
+    "createdAt": "2026-10-03T09:50:34.335Z"
+  },
+  {
+    "id": "LOG-0022",
+    "action": "LOGIN",
+    "userId": "USR-0001",
+    "username": "staff01",
+    "detail": "User signed in.",
+    "createdAt": "2026-10-04T09:44:12.416Z"
+  },
+  {
+    "id": "LOG-0023",
+    "action": "LOGIN",
+    "userId": "USR-0001",
+    "username": "staff01",
+    "detail": "User signed in.",
+    "createdAt": "2026-10-04T10:14:45.988Z"
+  },
+  {
+    "id": "LOG-0024",
+    "action": "LOGIN",
+    "userId": "USR-0001",
+    "username": "staff01",
+    "detail": "Demo quick sign-in.",
+    "createdAt": "2026-10-11T09:30:22.003Z"
+  }
+]
