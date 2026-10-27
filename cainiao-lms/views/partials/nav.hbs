@@ -1,0 +1,43 @@
+{{!-- Role-aware navigation built from the current user supplied by app.js. --}}
+<nav class="navbar navbar-expand-lg navbar-dark app-navbar shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-semibold" href="/">
+      <span class="brand-mark">C</span>
+      {{siteConfig.siteName}}
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavigation" aria-controls="mainNavigation" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mainNavigation">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        {{#if currentUser}}
+          {{#if (eq currentUser.role "staff")}}
+            <li class="nav-item"><a class="nav-link" href="/staff/dashboard">Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" href="/staff/packages">Parcels</a></li>
+            <li class="nav-item"><a class="nav-link" href="/staff/shelves">Shelves</a></li>
+            <li class="nav-item"><a class="nav-link" href="/staff/exceptions">Exceptions</a></li>
+          {{/if}}
+          {{#if (eq currentUser.role "admin")}}
+            <li class="nav-item"><a class="nav-link" href="/admin/reports">Reports</a></li>
+            <li class="nav-item"><a class="nav-link" href="/admin/users">Users</a></li>
+            <li class="nav-item"><a class="nav-link" href="/admin/logs">Logs</a></li>
+            <li class="nav-item"><a class="nav-link" href="/admin/config">Configuration</a></li>
+          {{/if}}
+          {{#if (eq currentUser.role "customer")}}
+            <li class="nav-item"><a class="nav-link" href="/my/packages">My parcels</a></li>
+            <li class="nav-item"><a class="nav-link" href="/my/notifications">Notifications</a></li>
+          {{/if}}
+        {{/if}}
+      </ul>
+      {{#if currentUser}}
+        <div class="d-flex align-items-center gap-3 text-white">
+          <div class="text-end lh-sm">
+            <div class="fw-semibold">{{currentUser.name}}</div>
+            <small class="text-white-50 text-capitalize">{{currentUser.role}}</small>
+          </div>
+          <a class="btn btn-sm btn-outline-light" href="/logout">Sign out</a>
+        </div>
+      {{/if}}
+    </div>
+  </div>
+</nav>

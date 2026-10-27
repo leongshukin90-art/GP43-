@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 ﻿# Cainiao LMS — team project skeleton
+=======
+# Cainiao LMS — team project skeleton
+>>>>>>> 040814e789159702fbf9c385d6d1e5d3e0986eb3
 
 A runnable full-stack **framework** for the Cainiao Post (Hong Kong) parcel management system.
 The application boots, you can sign in, role guards work, and every unfinished page tells you
@@ -187,3 +191,10 @@ The reference implementation, if you have it next door, has a broken login in
 `POST /login` throws `ReferenceError: user is not defined`. This project ships a clean
 `routes/auth.js` instead, so sign-in works from the start. Fix the reference before using it
 as a behaviour reference for authentication.
+<<<<<<< HEAD
+=======
+
+## Version control
+The repository's `.gitignore` lists `node_modules/`, so anyone who updates the project with
+`git clone` and `git push` will not upload the `node_modules/` folder installed on their own machine.
+>>>>>>> 040814e789159702fbf9c385d6d1e5d3e0986eb3

@@ -1,0 +1,66 @@
+{{!-- Staff Dashboard - frontend-staff --}}
+
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Staff Dashboard</h2>
+    <a href="/staff/packages/create" class="btn btn-warning">Receive parcel</a>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h6 class="text-muted">Total Packages</h6>
+          <h3>{{totalPackages}}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h6 class="text-muted">Arrived</h6>
+          <h3>{{counts.Arrived}}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h6 class="text-muted">Notified</h6>
+          <h3>{{counts.Notified}}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h6 class="text-muted">Exceptions</h6>
+          <h3>{{counts.Exception}}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h6 class="text-muted">Active Shelves</h6>
+          <h3>{{activeShelves}}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      Quick Actions
+    </div>
+    <div class="card-body">
+      <a href="/staff/packages" class="btn btn-outline-secondary me-2">View parcels</a>
+      <a href="/staff/shelves" class="btn btn-outline-secondary me-2">Manage shelves</a>
+      <a href="/staff/exceptions" class="btn btn-outline-secondary me-2">Handle exceptions</a>
+      <a href="/staff/packages/create" class="btn btn-warning">Receive parcel</a>
+    </div>
+  </div>
+</div>

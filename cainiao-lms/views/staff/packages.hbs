@@ -1,0 +1,44 @@
+{{!-- Packages list - frontend-staff --}}
+
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Parcels</h2>
+    <a href="/staff/packages/create" class="btn btn-warning">Receive parcel</a>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      Parcel List
+    </div>
+    <div class="card-body">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Tracking</th>
+            <th>Recipient</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Pickup Code</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each packages}}
+          <tr>
+            <td>{{trackingNo}}</td>
+            <td>{{recipientName}}</td>
+            <td>{{type}}</td>
+            <td>{{status}}</td>
+            <td>{{#if pickupCode}}{{pickupCode}}{{else}}-{{/if}}</td>
+            <td><a href="/staff/packages/{{id}}">View</a></td>
+          </tr>
+          {{else}}
+          <tr>
+            <td colspan="6" class="text-center">No parcels yet.</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

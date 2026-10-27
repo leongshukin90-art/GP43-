@@ -1,0 +1,63 @@
+﻿{{!-- Sign-in page, styled after the project prototype:
+     prototype/cainiao-lms-prototype.html -> renderLogin().
+     Left panel = one-click demo sign-in. Right panel = the real credential form.
+     Field names must match the POST /login route in routes/auth.js. --}}
+<section class="login-card">
+  <div class="login-info">
+    <div class="brand-mark">C</div>
+    <h1>Cainiao Post LMS</h1>
+    <p>
+      Parcel management for {{siteConfig.siteName}}. Sign in as a station worker to receive,
+      shelve, notify and hand over parcels, as an administrator to run reports and manage users,
+      or as a customer to follow your own parcels.
+    </p>
+
+    <div class="scenario-box">
+      <strong>Quick sign in</strong>
+      <p class="scenario-hint">One click, no password. Demo accounts only.</p>
+      <div class="scenario-actions">
+        {{#each demoAccounts}}
+          <form method="post" action="/demo/login" class="quick-login">
+            <input type="hidden" name="username" value="{{username}}">
+            <button class="btn btn-soft" type="submit">
+              <span class="quick-role">{{role}}</span>
+              <span class="quick-user">{{username}}</span>
+            </button>
+          </form>
+        {{/each}}
+      </div>
+    </div>
+  </div>
+
+  <form class="login-form" method="post" action="/login">
+    <h2>Sign in</h2>
+
+    {{#if error}}
+      <div class="error-box" role="alert">{{error}}</div>
+    {{/if}}
+
+    <div class="field">
+      <label for="username">Username</label>
+      <input id="username" name="username" value="{{username}}" autocomplete="username" required autofocus>
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Sign in</button>
+
+    <div class="demo-users">
+      {{#each demoAccounts}}
+        <div class="demo-user">
+          <div>
+            <strong>{{username}}</strong>
+            <span>{{name}} · {{role}}</span>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+    <p class="demo-note">Password for all demo accounts: <code>123456</code></p>
+  </form>
+</section>

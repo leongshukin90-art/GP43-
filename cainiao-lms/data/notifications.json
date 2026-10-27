@@ -1,0 +1,47 @@
+[
+  {
+    "id": "NOT-0001",
+    "userId": "USR-0003",
+    "packageId": "PKG-1003",
+    "title": "Parcel ready for pickup: CAINIAO-HK-1003",
+    "content": "Hello Chan Tai Man, parcel CAINIAO-HK-1003 is ready at Cainiao Post HK. Your pickup code is 481920.",
+    "isRead": false,
+    "createdAt": "2026-09-29T04:45:00.000Z"
+  },
+  {
+    "id": "NOT-0002",
+    "userId": "USR-0003",
+    "packageId": "PKG-1004",
+    "title": "Parcel ready for pickup: CAINIAO-HK-1004",
+    "content": "Hello Chan Tai Man, parcel CAINIAO-HK-1004 is ready at Cainiao Post HK. Your pickup code is 173456.",
+    "isRead": true,
+    "createdAt": "2026-09-24T01:15:00.000Z"
+  },
+  {
+    "id": "NOT-0003",
+    "userId": "USR-0003",
+    "packageId": "PKG-1006",
+    "title": "Parcel ready for pickup: CAINIAO-HK-1006",
+    "content": "Hello Chan Tai Man, parcel CAINIAO-HK-1006 is ready at Cainiao Post HK. Your pickup code is 619283.",
+    "isRead": false,
+    "createdAt": "2026-09-30T03:30:00.000Z"
+  },
+  {
+    "id": "NOT-0004",
+    "userId": "USR-0003",
+    "packageId": "PKG-1009",
+    "title": "Parcel ready for pickup: CAINIAO-HK-1009",
+    "content": "Hello Chan Tai Man, parcel CAINIAO-HK-1009 is ready at Cainiao Post HK. Your pickup code is 284610.",
+    "isRead": true,
+    "createdAt": "2026-09-26T02:10:00.000Z"
+  },
+  {
+    "id": "NOT-0005",
+    "userId": "USR-0003",
+    "packageId": "PKG-1010",
+    "title": "Parcel ready for pickup: CAINIAO-HK-1010",
+    "content": "Hello Chan Tai Man, parcel CAINIAO-HK-1010 is ready at Cainiao Post HK. Your pickup code is 735549.",
+    "isRead": false,
+    "createdAt": "2026-10-01T00:35:00.000Z"
+  }
+]

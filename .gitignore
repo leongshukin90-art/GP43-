@@ -1,0 +1,59 @@
+# Cainiao LMS (Cainiao Post HK) - Git ignore rules
+# Keep every comment and text value in English, like the rest of the project.
+
+# --- Node.js dependencies -------------------------------------------------
+# Installed by "npm install". Project rule 5: never hand back node_modules/.
+# The pattern has no leading slash, so it matches node_modules at every depth,
+# including cainiao-lms/node_modules/.
+node_modules/
+
+# npm pack / cache leftovers, if they ever land inside the project.
+*.tgz
+.npm/
+
+# --- Logs and debug output ------------------------------------------------
+# The application's audit trail is cainiao-lms/data/logs.json; it changes on
+# every sign-in, so it is kept local (see the project data section below).
+# These patterns only catch tool output (npm, nodemon, test runs).
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- Local environment and secrets ---------------------------------------
+# No .env file is used today (only PORT is read). Keep any future one local.
+# The exception documents the expected template instead of hiding it.
+.env
+.env.*
+!.env.example
+
+# --- Editor and operating-system noise -----------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# --- Test and coverage output --------------------------------------------
+coverage/
+.nyc_output/
+
+# --- Merge leftovers ------------------------------------------------------
+*.orig
+*.rej
+
+# --- Project data that stays tracked -------------------------------------
+# data/*.json is the seed and demo state (3 users, 5 shelves, 10 parcels).
+# It must be committed so every team member starts from the same records.
+# The one exception is the audit trail: it grows on every action, so it is
+# local runtime state instead of shared demo data.
+cainiao-lms/data/logs.json
+# snapshots/ is the manual pre-Git undo. Git history replaces it, so the dated
+# backup folders are ignored wherever they sit (the project keeps them in
+# cainiao-lms/snapshots/); the folder's README.md stays tracked.
+**/snapshots/*/

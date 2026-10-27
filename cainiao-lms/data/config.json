@@ -1,0 +1,8 @@
+{
+  "siteName": "Cainiao Post HK",
+  "siteCode": "HK-CN-001",
+  "address": "88 Kowloon Road, Hong Kong",
+  "phone": "+852 3000 8000",
+  "notificationTemplate": "Hello {{name}}, parcel {{trackingNo}} is ready at {{siteName}}. Your pickup code is {{pickupCode}}.",
+  "language": "en"
+}
