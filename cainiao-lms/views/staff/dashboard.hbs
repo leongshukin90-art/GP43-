@@ -1,4 +1,4 @@
-﻿{{!-- Staff Dashboard - frontend-staff --}}
+{{!-- Staff Dashboard - frontend-staff --}}
 
 <div class="container mt-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
@@ -10,24 +10,24 @@
     <div class="col-md-3">
       <div class="card text-center">
         <div class="card-body">
-          <h6 class="text-muted">Total Parcels</h6>
-          <h3>{{totalParcels}}</h3>
+          <h6 class="text-muted">Total Packages</h6>
+          <h3>{{totalPackages}}</h3>
         </div>
       </div>
     </div>
     <div class="col-md-3">
       <div class="card text-center">
         <div class="card-body">
-          <h6 class="text-muted">Waiting for Shelf</h6>
-          <h3>{{waitingForShelf}}</h3>
+          <h6 class="text-muted">Arrived</h6>
+          <h3>{{counts.Arrived}}</h3>
         </div>
       </div>
     </div>
     <div class="col-md-3">
       <div class="card text-center">
         <div class="card-body">
-          <h6 class="text-muted">Ready for Pickup</h6>
-          <h3>{{readyForPickup}}</h3>
+          <h6 class="text-muted">Notified</h6>
+          <h3>{{counts.Notified}}</h3>
         </div>
       </div>
     </div>
@@ -35,7 +35,18 @@
       <div class="card text-center">
         <div class="card-body">
           <h6 class="text-muted">Exceptions</h6>
-          <h3>{{exceptionsCount}}</h3>
+          <h3>{{counts.Exception}}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h6 class="text-muted">Active Shelves</h6>
+          <h3>{{activeShelves}}</h3>
         </div>
       </div>
     </div>
@@ -43,35 +54,13 @@
 
   <div class="card">
     <div class="card-header">
-      Parcel Registry
+      Quick Actions
     </div>
     <div class="card-body">
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th>Tracking</th>
-            <th>Recipient</th>
-            <th>Type</th>
-            <th>Status</th>
-            <th>Pickup Code</th>
-          </tr>
-        </thead>
-        <tbody>
-          {{#each packages}}
-          <tr>
-            <td><a href="/staff/packages/{{id}}">{{trackingNo}}</a></td>
-            <td>{{recipientName}}</td>
-            <td>{{type}}</td>
-            <td>{{status}}</td>
-            <td>{{#if pickupCode}}{{pickupCode}}{{else}}-{{/if}}</td>
-          </tr>
-          {{else}}
-          <tr>
-            <td colspan="5" class="text-center">No parcels yet.</td>
-          </tr>
-          {{/each}}
-        </tbody>
-      </table>
+      <a href="/staff/packages" class="btn btn-outline-secondary me-2">View parcels</a>
+      <a href="/staff/shelves" class="btn btn-outline-secondary me-2">Manage shelves</a>
+      <a href="/staff/exceptions" class="btn btn-outline-secondary me-2">Handle exceptions</a>
+      <a href="/staff/packages/create" class="btn btn-warning">Receive parcel</a>
     </div>
   </div>
 </div>
