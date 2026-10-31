@@ -9,8 +9,43 @@
 
 const express = require('express');
 const { stubPage } = require('../utils/stub');
-
+const { readJson, writeJson } = require('../utils/db');
+const { logAction } = require( '../utils/logger' );
+const { nextId } = require('../utils/id');
+const { createParcel } = require('../utils/parcels');
+const { PACKAGE_TYPES } = require('../utils/packageStatus');
+const { trimText } = require('../utils/request');
 const router = express.Router();
+
+// ---------------------------------------------------------------- helpers
+
+// Renders the receive-parcel form, with the customer list for its dropdown.
+function renderPackageForm(res,options = {}){
+  const users = readJson('users.json',[]);
+  const customers = users.filter((user) => user.role === 'customer');
+
+  return res.render('staff/package-form',{
+    title: 'Receive parcels',
+    customers,
+    types: PACKAGE_TYPES,
+    success: options.success || null,
+    error: options.error || null
+  });
+}
+
+// Appends one tracking event and writes it back to tracking.json.
+function addTracking(packageId,status,description){
+  const tracking = readJson('tracking.json',[]);
+  tracking.push({
+    id: nextId('TRK',tracking),
+    packageId,
+    status,
+    description,
+    operator: global.currentUser ? global.currentUser.username : 'system',
+    createdAt: new Date().toISOString()
+  });
+  writeJson('tracking.json',tracking);
+}
 
 // ---------------------------------------------------------------- dashboard
 router.get('/dashboard', stubPage({
@@ -31,29 +66,131 @@ router.get('/packages', stubPage({
 }));
 
 // Declared before '/packages/:id' so "create" is not read as an ID.
-router.get('/packages/create', stubPage({
-  owner: 'frontend-staff',
-  view: 'staff/package-form',
-  title: 'Receive parcels',
-  needs: ['Single parcel form', 'Customer dropdown', 'Batch textarea (one "tracking | name | phone | weight | type" row per line)'],
-  rules: ['Single form posts to /staff/packages.', 'Batch form posts to /staff/packages/batch.']
-}));
+router.get('/packages/create', (req,res) =>{
+  return renderPackageForm(res);
+});
 
-router.post('/packages', stubPage({
-  owner: 'backend-parcel',
-  view: 'staff/package-form',
-  title: 'Receive one parcel',
-  needs: ['Validate trackingNo, recipientName, recipientPhone, customerId, weight, type', 'Use utils/parcels.js createParcel()', 'Append a tracking event and an operation log'],
-  rules: ['Track an invalid submission by re-rendering the form with an error.', 'Never crash on bad input.']
-}));
+router.post('/packages', (req, res) => {
+  const trackingNo = trimText(req.body.trackingNo);
+  const recipientName = trimText(req.body.recipientName);
+  const recipientPhone = trimText(req.body.recipientPhone);
+  const customerId = trimText(req.body.customerId);
+  const weight = Number(req.body.weight);
+  const type = trimText(req.body.type);
 
-router.post('/packages/batch', stubPage({
-  owner: 'backend-parcel',
-  view: 'staff/package-form',
-  title: 'Receive a batch of parcels',
-  needs: ['One parcel per line', 'Accept "|" or comma separators', 'Report created and skipped rows'],
-  rules: ['Skip invalid rows without failing the whole request.']
-}));
+  const users = readJson('users.json', []);
+  const packages = readJson('packages.json', []);
+
+  // Collect every problem at once, so the user sees them all together.
+  const errors = [];
+  if (!trackingNo) {
+    errors.push('Tracking number is required.');
+  } else if (packages.some((p) => p.trackingNo.toLowerCase() === trackingNo.toLowerCase())) {
+    errors.push('That tracking number is already in use.');
+  }
+  if (!recipientName) {
+    errors.push('Recipient name is required.');
+  }
+  if (!recipientPhone) {
+    errors.push('Recipient phone is required.');
+  }
+  const customer = users.find((user) => user.id === customerId && user.role === 'customer');
+  if (!customer) {
+    errors.push('Choose a customer.');
+  }
+  if (!Number.isFinite(weight) || weight <= 0) {
+    errors.push('Weight must be a positive number.');
+  }
+  if (!PACKAGE_TYPES.includes(type)) {
+    errors.push('Choose a valid parcel type.');
+  }
+
+  if (errors.length > 0) {
+    return renderPackageForm(res, { error: errors.join(' ') });
+  }
+
+  const parcel = createParcel(packages, {
+    trackingNo,
+    recipientName,
+    recipientPhone,
+    customerId,
+    weight,
+    type
+  });
+  packages.push(parcel);
+  writeJson('packages.json', packages);
+
+  addTracking(parcel.id, 'Arrived', 'Parcel received at the station.');
+  logAction(global.currentUser, 'RECEIVE', `Received parcel ${parcel.trackingNo}.`);
+
+  return res.redirect('/staff/packages');
+});
+
+router.post('/packages/batch', (req, res) => {
+  const customerId = trimText(req.body.customerId);
+  const raw = String(req.body.batch || '');
+  const users = readJson('users.json', []);
+  const packages = readJson('packages.json', []);
+
+  // One shared customer for the whole batch.
+  const customer = users.find((user) => user.id === customerId && user.role === 'customer');
+  if (!customer) {
+    return renderPackageForm(res, { error: 'Choose a customer for the batch.' });
+  }
+
+  // Split the textarea into rows, one parcel per row.
+  const rows = raw.split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line !== '');
+
+  let created = 0;
+  let skipped = 0;
+
+  rows.forEach((row) => {
+    // Accept "|" or comma as the separator.
+    const parts = row.split(/[|,]/).map((part) => part.trim());
+    const [trackingNo, recipientName, recipientPhone, weightText, typeRaw] = parts;
+
+    const weight = Number(weightText);
+    const type = trimText(typeRaw) || 'Parcel';   // missing type defaults to Parcel
+
+    // Skip this row instead of crashing the whole request.
+    if (!trackingNo || !recipientName || !recipientPhone) {
+      skipped += 1;
+      return;
+    }
+    if (!Number.isFinite(weight) || weight <= 0) {
+      skipped += 1;
+      return;
+    }
+    if (packages.some((p) => p.trackingNo.toLowerCase() === trackingNo.toLowerCase())) {
+      skipped += 1;
+      return;
+    }
+    if (!PACKAGE_TYPES.includes(type)) {
+      skipped += 1;
+      return;
+    }
+
+    const parcel = createParcel(packages, {
+      trackingNo,
+      recipientName,
+      recipientPhone,
+      customerId,
+      weight,
+      type
+    });
+    packages.push(parcel);
+    addTracking(parcel.id, 'Arrived', 'Parcel received at the station.');
+    created += 1;
+  });
+
+  writeJson('packages.json', packages);
+  logAction(global.currentUser, 'RECEIVE_BATCH', `Batch received: ${created} created, ${skipped} skipped.`);
+
+  const report = `${created} parcels created, ${skipped} skipped.`;
+  return res.redirect(`/staff/packages?success=${encodeURIComponent(report)}`);
+});
 
 router.get('/packages/:id', stubPage({
   owner: 'frontend-staff',

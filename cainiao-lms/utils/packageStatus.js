@@ -1,4 +1,5 @@
 const PACKAGE_STATUSES = ['Arrived', 'Shelved', 'Notified', 'Picked Up', 'Exception'];
+const PACKAGE_TYPES = ['Parcel','Document','Fragile','Bulky','Cold Chain'];
 
 // Bootstrap color token for each domain status.
 function statusClass(status) {
@@ -32,6 +33,7 @@ function canPickup(status) {
 
 module.exports = {
   PACKAGE_STATUSES,
+  PACKAGE_TYPES,
   canNotify,
   canPickup,
   canReportException,

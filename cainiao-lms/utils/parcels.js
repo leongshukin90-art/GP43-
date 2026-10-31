@@ -18,7 +18,23 @@ const { nextId } = require('./id');
  * @returns {Object} a complete parcel record ready to push into data/packages.json
  */
 function createParcel(packages, input) {
-  throw new Error('createParcel is not implemented yet (OWNER: backend-parcel).');
+  const parcel = {
+    id: nextId('PKG',packages),
+    trackingNo: input.trackingNo,
+    recipientName: input.recipientName,
+    recipientPhone: input.recipientPhone,
+    customerId: input.customerId,
+    shelfId: null,
+    pickupCode: null,
+    status: 'Arrived',
+    weight: input.weight,
+    type: input.type,
+    arrivedAt: new Date().toISOString(),
+    shelvedAt: null,
+    notifiedAt: null,
+    pickedUpAt: null
+  };
+  return parcel;
 }
 
 /**
@@ -29,7 +45,16 @@ function createParcel(packages, input) {
  * @returns {Object} { Arrived: 2, Shelved: 1, ... }
  */
 function countByStatus(packages, statuses) {
-  throw new Error('countByStatus is not implemented yet (OWNER: backend-parcel).');
+  const stats = {};
+  statuses.forEach((status) => {
+    stats[status] = 0;
+  });
+  packages.forEach((parcel) => {
+    if (stats[parcel.status] !== undefined){
+      stats[parcel.status] += 1;
+    }
+  });
+  return stats;
 }
 
 module.exports = {
