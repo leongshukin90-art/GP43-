@@ -1,2 +1,91 @@
-﻿{{!-- OWNER: frontend-staff — replace this placeholder with the parcel detail + actions + timeline. --}}
-{{> stub}}
+{{!-- Parcel detail, lifecycle actions, shelf assignment, and tracking timeline. --}}
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+  <div>
+    <a class="small text-decoration-none" href="/staff/packages">← All parcels</a>
+    <h1 class="h2 mt-2 mb-1">{{parcel.trackingNo}}</h1>
+    <span class="badge text-bg-{{statusClass parcel.status}}">{{parcel.status}}</span>
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    {{#if canNotify}}<form method="post" action="/staff/packages/{{parcel.id}}/notify"><button class="btn btn-warning" type="submit">Generate notification</button></form>{{/if}}
+    {{#if canPickup}}<form method="post" action="/staff/packages/{{parcel.id}}/pickup" data-confirm="Confirm that this parcel was handed to the customer?"><button class="btn btn-success" type="submit">Confirm pickup</button></form>{{/if}}
+  </div>
+</div>
+
+{{> alerts}}
+
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white py-3"><h2 class="h5 mb-0">Parcel information</h2></div>
+      <div class="card-body">
+        <div class="row g-4">
+          <div class="col-sm-6"><div class="detail-label">Recipient</div><div class="detail-value">{{parcel.recipientName}}</div></div>
+          <div class="col-sm-6"><div class="detail-label">Phone</div><div class="detail-value">{{parcel.recipientPhone}}</div></div>
+          <div class="col-sm-6"><div class="detail-label">Type</div><div class="detail-value">{{parcel.type}}</div></div>
+          <div class="col-sm-6"><div class="detail-label">Weight</div><div class="detail-value">{{parcel.weight}} kg</div></div>
+          <div class="col-sm-6"><div class="detail-label">Pickup code</div><div class="detail-value">{{#if parcel.pickupCode}}<code class="fs-5">{{parcel.pickupCode}}</code>{{else}}—{{/if}}</div></div>
+          <div class="col-sm-6"><div class="detail-label">Arrived</div><div class="detail-value">{{formatDate parcel.arrivedAt}}</div></div>
+          <div class="col-sm-6"><div class="detail-label">Shelved</div><div class="detail-value">{{formatDate parcel.shelvedAt}}</div></div>
+          <div class="col-sm-6"><div class="detail-label">Notified</div><div class="detail-value">{{formatDate parcel.notifiedAt}}</div></div>
+          <div class="col-sm-6"><div class="detail-label">Picked up</div><div class="detail-value">{{formatDate parcel.pickedUpAt}}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white py-3"><h2 class="h5 mb-0">Tracking history</h2></div>
+      <div class="card-body">
+        <div class="timeline">
+          {{#each tracking}}
+            <div class="timeline-item">
+              <div class="timeline-dot text-bg-{{statusClass status}}"></div>
+              <div class="d-flex flex-wrap justify-content-between gap-2">
+                <div><div class="fw-semibold">{{status}}</div><div class="text-secondary">{{description}}</div></div>
+                <div class="text-secondary small text-end">{{formatDate createdAt}}<br>by {{operator}}</div>
+              </div>
+            </div>
+          {{else}}
+            <p class="text-secondary mb-0">No tracking events recorded.</p>
+          {{/each}}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    {{#if canShelve}}
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white py-3"><h2 class="h5 mb-0">Shelf assignment</h2></div>
+        <div class="card-body">
+          <p class="text-secondary">Choose an active shelf with available capacity. A unique pickup code will be generated.</p>
+          <form method="post" action="/staff/packages/{{parcel.id}}/shelf" class="vstack gap-3">
+            <select class="form-select" name="shelfId" required>
+              <option value="">Select shelf</option>
+              {{#each shelves}}<option value="{{id}}">{{code}} · {{cabinet}} · {{used}}/{{capacity}} used</option>{{/each}}
+            </select>
+            <button class="btn btn-primary" type="submit">Place on shelf</button>
+          </form>
+        </div>
+      </div>
+    {{/if}}
+
+    {{#if parcel.shelfId}}
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <div class="detail-label">Assigned shelf ID</div>
+          <div class="detail-value">{{parcel.shelfId}}</div>
+        </div>
+      </div>
+    {{/if}}
+
+    {{#if canReportException}}
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h2 class="h6">Something wrong?</h2>
+          <p class="text-secondary small mb-3">Report damage, loss, address problems, or another issue.</p>
+          <a class="btn btn-outline-danger" href="/staff/exceptions?packageId={{parcel.id}}">Report exception</a>
+        </div>
+      </div>
+    {{/if}}
+  </div>
+</div>

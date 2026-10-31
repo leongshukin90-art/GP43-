@@ -4,39 +4,45 @@
   <h2>Receive Parcel</h2>
   <p class="text-muted">Add a new parcel into the system</p>
 
+  {{#if success}}
+    <div class="alert alert-success" role="alert">{{success}}</div>
+  {{/if}}
+  {{#if error}}
+    <div class="alert alert-danger" role="alert">{{error}}</div>
+  {{/if}}
+
   <div class="card mb-4">
-    <div class="card-header">
-      Single Parcel
-    </div>
+    <div class="card-header">Single Parcel</div>
     <div class="card-body">
       <form method="POST" action="/staff/packages">
         <div class="mb-3">
-          <label class="form-label">Tracking Number</label>
-          <input type="text" name="trackingNo" class="form-control" required>
+          <label class="form-label" for="trackingNo">Tracking Number</label>
+          <input id="trackingNo" type="text" name="trackingNo" class="form-control" required>
         </div>
         <div class="mb-3">
-          <label class="form-label">Recipient Name</label>
-          <input type="text" name="recipientName" class="form-control" required>
+          <label class="form-label" for="recipientName">Recipient Name</label>
+          <input id="recipientName" type="text" name="recipientName" class="form-control" required>
         </div>
         <div class="mb-3">
-          <label class="form-label">Customer</label>
-          <select name="customerId" class="form-select">
+          <label class="form-label" for="recipientPhone">Recipient Phone</label>
+          <input id="recipientPhone" type="tel" name="recipientPhone" class="form-control" placeholder="+852 9000 0000" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="customerId">Customer</label>
+          <select id="customerId" name="customerId" class="form-select" required>
             {{#each customers}}
             <option value="{{id}}">{{name}}</option>
             {{/each}}
           </select>
         </div>
         <div class="mb-3">
-          <label class="form-label">Weight (kg)</label>
-          <input type="number" name="weight" class="form-control" step="0.1" min="0.1" required>
+          <label class="form-label" for="weight">Weight (kg)</label>
+          <input id="weight" type="number" name="weight" class="form-control" step="0.1" min="0.1" required>
         </div>
         <div class="mb-3">
-          <label class="form-label">Type</label>
-          <select name="type" class="form-select">
-            <option>Parcel</option>
-            <option>Document</option>
-            <option>Fragile</option>
-            <option>Bulky</option>
+          <label class="form-label" for="type">Type</label>
+          <select id="type" name="type" class="form-select">
+            {{#each types}}<option value="{{this}}">{{this}}</option>{{/each}}
           </select>
         </div>
         <button type="submit" class="btn btn-warning">Receive Parcel</button>
@@ -45,14 +51,21 @@
   </div>
 
   <div class="card">
-    <div class="card-header">
-      Batch Receive
-    </div>
+    <div class="card-header">Batch Receive</div>
     <div class="card-body">
       <form method="POST" action="/staff/packages/batch">
         <div class="mb-3">
-          <label class="form-label">One line per parcel (tracking | name | weight | type)</label>
-          <textarea name="batch" class="form-control" rows="6" placeholder="HK-3001 | Chan Tai Man | 1.5 | Parcel"></textarea>
+          <label class="form-label" for="batchCustomerId">Customer</label>
+          <select id="batchCustomerId" name="customerId" class="form-select" required>
+            {{#each customers}}
+            <option value="{{id}}">{{name}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="batch">One line per parcel: tracking | name | phone | weight | type</label>
+          <textarea id="batch" name="batch" class="form-control" rows="6" placeholder="HK-3001 | Chan Tai Man | +852 9123 4003 | 1.5 | Parcel" required></textarea>
+          <div class="form-text">Type is optional and defaults to Parcel.</div>
         </div>
         <button type="submit" class="btn btn-outline-secondary">Receive Batch</button>
       </form>

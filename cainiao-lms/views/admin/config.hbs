@@ -1,2 +1,29 @@
-﻿{{!-- OWNER: frontend-admin — replace this placeholder with the configuration page. --}}
-{{> stub}}
+{{!-- Admin site and notification-template settings. --}}
+<div class="mb-4">
+  <p class="text-primary fw-semibold text-uppercase small mb-1">System administration</p>
+  <h1 class="h2 mb-0">System configuration</h1>
+</div>
+
+{{> alerts}}
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-4">
+    <form method="post" action="/admin/config" class="row g-3">
+      <div class="col-md-6"><label class="form-label" for="siteName">Site name</label><input class="form-control" id="siteName" name="siteName" value="{{config.siteName}}" required></div>
+      <div class="col-md-6"><label class="form-label" for="siteCode">Site code</label><input class="form-control" id="siteCode" name="siteCode" value="{{config.siteCode}}" required></div>
+      <div class="col-md-8"><label class="form-label" for="address">Address</label><input class="form-control" id="address" name="address" value="{{config.address}}" required></div>
+      <div class="col-md-4"><label class="form-label" for="phone">Phone</label><input class="form-control" id="phone" name="phone" value="{{config.phone}}" required></div>
+      <div class="col-md-4">
+        <label class="form-label" for="language">Language</label>
+        <input class="form-control" id="language" value="English (en)" disabled>
+        <input type="hidden" name="language" value="en">
+      </div>
+      <div class="col-12">
+        <label class="form-label" for="notificationTemplate">Pickup notification template</label>
+        <textarea class="form-control font-monospace" id="notificationTemplate" name="notificationTemplate" rows="4" required>{{config.notificationTemplate}}</textarea>
+        <div class="form-text">Available placeholders: <code>siteName</code>, <code>trackingNo</code>, <code>pickupCode</code>, and <code>name</code>, each wrapped in double braces.</div>
+      </div>
+      <div class="col-12 d-grid d-md-flex justify-content-md-end"><button class="btn btn-primary px-4" type="submit">Save configuration</button></div>
+    </form>
+  </div>
+</div>

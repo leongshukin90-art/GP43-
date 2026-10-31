@@ -63,4 +63,32 @@
       <a href="/staff/packages/create" class="btn btn-warning">Receive parcel</a>
     </div>
   </div>
+
+  <div class="card mt-4">
+    <div class="card-header">Recent arrivals</div>
+    <div class="card-body">
+      {{#if recentArrivals}}
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0">
+            <thead>
+              <tr><th>Tracking</th><th>Recipient</th><th>Status</th><th>Arrived</th><th></th></tr>
+            </thead>
+            <tbody>
+              {{#each recentArrivals}}
+              <tr>
+                <td>{{trackingNo}}</td>
+                <td>{{recipientName}}</td>
+                <td><span class="badge text-bg-{{statusClass status}}">{{status}}</span></td>
+                <td>{{formatDateOnly arrivedAt}}</td>
+                <td><a href="/staff/packages/{{id}}">View</a></td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+      {{else}}
+        <p class="text-secondary mb-0">No parcels have arrived yet.</p>
+      {{/if}}
+    </div>
+  </div>
 </div>

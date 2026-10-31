@@ -6,7 +6,7 @@
     "description": "Outer packaging is torn and requires staff assessment.",
     "status": "Open",
     "reportedBy": "USR-0001",
-    "createdAt": "2026-09-29T06:40:00.000Z",
+    "createdAt": "2026-10-29T06:40:00.000Z",
     "resolvedAt": null
   },
   {
@@ -16,7 +16,7 @@
     "description": "Recipient phone number was incomplete; contact details were confirmed.",
     "status": "Resolved",
     "reportedBy": "USR-0001",
-    "createdAt": "2026-09-23T05:10:00.000Z",
-    "resolvedAt": "2026-09-23T09:15:00.000Z"
+    "createdAt": "2026-10-23T05:10:00.000Z",
+    "resolvedAt": "2026-10-23T09:15:00.000Z"
   }
 ]

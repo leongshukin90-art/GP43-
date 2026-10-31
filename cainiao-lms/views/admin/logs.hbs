@@ -1,2 +1,38 @@
-﻿{{!-- OWNER: frontend-admin — replace this placeholder with the operation log browser. --}}
-{{> stub}}
+{{!-- Admin audit-log search, filter, and pagination. --}}
+<div class="mb-4">
+  <p class="text-primary fw-semibold text-uppercase small mb-1">System administration</p>
+  <h1 class="h2 mb-0">Operation logs</h1>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <form class="row g-3 align-items-end" method="get" action="/admin/logs">
+      <div class="col-md-6"><label class="form-label" for="q">Search</label><input class="form-control" id="q" name="q" value="{{filters.q}}" placeholder="Username, action or detail"></div>
+      <div class="col-md-4"><label class="form-label" for="action">Action</label><select class="form-select" id="action" name="action"><option value="">All actions</option>{{#each actions}}<option value="{{this}}" {{selectedIf ../filters.action this}}>{{this}}</option>{{/each}}</select></div>
+      <div class="col-md-2 d-grid"><button class="btn btn-outline-primary" type="submit">Filter</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-white py-3 d-flex justify-content-between"><span class="fw-semibold">{{total}} log entries</span><span class="text-secondary small">Page {{page}} of {{totalPages}}</span></div>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead><tr><th>Time</th><th>Operator</th><th>Action</th><th>Detail</th></tr></thead>
+      <tbody>
+        {{#each logs}}
+          <tr><td class="text-nowrap">{{formatDate createdAt}}</td><td>{{username}}</td><td><code>{{action}}</code></td><td>{{detail}}</td></tr>
+        {{else}}
+          <tr><td colspan="4" class="text-center text-secondary py-5">No logs match these filters.</td></tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+  {{#if pagination.length}}
+    <div class="card-footer bg-white">
+      <ul class="pagination pagination-sm justify-content-center mb-0">
+        {{#each pagination}}<li class="page-item {{#if active}}active{{/if}}"><a class="page-link" href="{{url}}">{{number}}</a></li>{{/each}}
+      </ul>
+    </div>
+  {{/if}}
+</div>

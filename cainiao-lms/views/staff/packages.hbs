@@ -6,39 +6,90 @@
     <a href="/staff/packages/create" class="btn btn-warning">Receive parcel</a>
   </div>
 
-  <div class="card">
-    <div class="card-header">
-      Parcel List
-    </div>
+  {{#if success}}
+    <div class="alert alert-success" role="alert">{{success}}</div>
+  {{/if}}
+  {{#if error}}
+    <div class="alert alert-danger" role="alert">{{error}}</div>
+  {{/if}}
+
+  <form class="card mb-4" method="get" action="/staff/packages">
     <div class="card-body">
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th>Tracking</th>
-            <th>Recipient</th>
-            <th>Type</th>
-            <th>Status</th>
-            <th>Pickup Code</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {{#each packages}}
-          <tr>
-            <td>{{trackingNo}}</td>
-            <td>{{recipientName}}</td>
-            <td>{{type}}</td>
-            <td>{{status}}</td>
-            <td>{{#if pickupCode}}{{pickupCode}}{{else}}-{{/if}}</td>
-            <td><a href="/staff/packages/{{id}}">View</a></td>
-          </tr>
-          {{else}}
-          <tr>
-            <td colspan="6" class="text-center">No parcels yet.</td>
-          </tr>
-          {{/each}}
-        </tbody>
-      </table>
+      <div class="row g-3 align-items-end">
+        <div class="col-12 col-md-5">
+          <label class="form-label" for="q">Search</label>
+          <input id="q" name="q" class="form-control" type="search" value="{{filters.q}}" placeholder="Tracking, recipient, phone or pickup code">
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label" for="status">Status</label>
+          <select id="status" name="status" class="form-select">
+            <option value="">All statuses</option>
+            {{#each statuses}}<option value="{{this}}" {{selectedIf this ../filters.status}}>{{this}}</option>{{/each}}
+          </select>
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="form-label" for="type">Type</label>
+          <select id="type" name="type" class="form-select">
+            <option value="">All types</option>
+            {{#each types}}<option value="{{this}}" {{selectedIf this ../filters.type}}>{{this}}</option>{{/each}}
+          </select>
+        </div>
+        <div class="col-12 col-md-2 d-grid">
+          <button class="btn btn-primary" type="submit">Filter</button>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <p class="text-secondary">{{total}} {{#if (eq total 1)}}parcel{{else}}parcels{{/if}} found</p>
+
+  <div class="card">
+    <div class="card-header">Parcel List</div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>Tracking</th>
+              <th>Recipient</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Pickup Code</th>
+              <th>Arrived</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each packages}}
+            <tr>
+              <td><a href="/staff/packages/{{id}}">{{trackingNo}}</a></td>
+              <td>{{recipientName}}<br><small class="text-secondary">{{recipientPhone}}</small></td>
+              <td>{{type}}</td>
+              <td><span class="badge text-bg-{{statusClass status}}">{{status}}</span></td>
+              <td>{{#if pickupCode}}{{pickupCode}}{{else}}—{{/if}}</td>
+              <td>{{formatDateOnly arrivedAt}}</td>
+              <td><a class="btn btn-sm btn-outline-primary" href="/staff/packages/{{id}}">View</a></td>
+            </tr>
+            {{else}}
+            <tr>
+              <td colspan="7" class="text-center">No parcels match the filters.</td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
+
+  {{#if pagination.[1]}}
+  <nav class="mt-4" aria-label="Parcel pages">
+    <ul class="pagination justify-content-center flex-wrap">
+      {{#each pagination}}
+      <li class="page-item {{#if active}}active{{/if}}">
+        <a class="page-link" href="{{url}}">{{number}}</a>
+      </li>
+      {{/each}}
+    </ul>
+  </nav>
+  {{/if}}
 </div>

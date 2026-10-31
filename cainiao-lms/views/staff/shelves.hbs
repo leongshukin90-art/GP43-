@@ -1,2 +1,47 @@
-﻿{{!-- OWNER: frontend-staff — replace this placeholder with the shelf board. --}}
-{{> stub}}
+{{!-- Shelf capacity and maintenance controls. --}}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+  <div>
+    <p class="text-primary fw-semibold text-uppercase small mb-1">Storage operations</p>
+    <h1 class="h2 mb-0">Shelf management</h1>
+  </div>
+  <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#newShelf">Add shelf</button>
+</div>
+
+{{> alerts}}
+
+<div class="collapse mb-4" id="newShelf">
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <form class="row g-3 align-items-end" method="post" action="/staff/shelves">
+        <div class="col-md-3"><label class="form-label" for="code">Shelf code</label><input class="form-control" id="code" name="code" required placeholder="S-C-01"></div>
+        <div class="col-md-4"><label class="form-label" for="cabinet">Cabinet / zone</label><input class="form-control" id="cabinet" name="cabinet" required placeholder="Zone C · Cabinet 1"></div>
+        <div class="col-md-2"><label class="form-label" for="capacity">Capacity</label><input class="form-control" id="capacity" name="capacity" type="number" min="1" required></div>
+        <div class="col-md-3 d-grid"><button class="btn btn-primary" type="submit">Create shelf</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  {{#each shelves}}
+    <div class="col-md-6 col-xl-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+            <div><h2 class="h5 mb-1">{{code}}</h2><div class="text-secondary small">{{cabinet}}</div></div>
+            <span class="badge text-bg-{{#if (eq status "Active")}}success{{else}}secondary{{/if}}">{{status}}</span>
+          </div>
+          <div class="d-flex justify-content-between small mb-2"><span>Capacity used</span><strong>{{used}} / {{capacity}}</strong></div>
+          <div class="progress mb-3" role="progressbar" aria-label="Shelf usage" aria-valuenow="{{used}}" aria-valuemin="0" aria-valuemax="{{capacity}}">
+            <div class="progress-bar{{#if (eq used capacity)}} bg-danger{{/if}}" style="width: {{usagePercent}}%"></div>
+          </div>
+          <form method="post" action="/staff/shelves/{{id}}/status" class="d-grid">
+            <button class="btn btn-sm {{#if (eq status "Active")}}btn-outline-secondary{{else}}btn-outline-success{{/if}}" type="submit">{{#if (eq status "Active")}}Move to maintenance{{else}}Mark active{{/if}}</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  {{else}}
+    <div class="col-12"><div class="alert alert-info mb-0">No shelves configured.</div></div>
+  {{/each}}
+</div>

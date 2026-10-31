@@ -1,2 +1,58 @@
-﻿{{!-- OWNER: frontend-admin — replace this placeholder with the reports page (CSS chart, no library). --}}
-{{> stub}}
+{{!-- Admin report cards, status totals, and CSS-only charts. --}}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+  <div>
+    <p class="text-primary fw-semibold text-uppercase small mb-1">System overview</p>
+    <h1 class="h2 mb-0">Reports</h1>
+  </div>
+  <span class="badge text-bg-light border">{{siteConfig.siteCode}}</span>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4"><div class="card metric-card border-0 shadow-sm h-100"><div class="card-body"><div class="metric-label">Total parcels</div><div class="metric-value">{{totalPackages}}</div></div></div></div>
+  <div class="col-md-4"><div class="card metric-card border-0 shadow-sm h-100"><div class="card-body"><div class="metric-label">Ready for pickup</div><div class="metric-value text-warning">{{statusCounts.Notified}}</div></div></div></div>
+  <div class="col-md-4"><div class="card metric-card border-0 shadow-sm h-100"><div class="card-body"><div class="metric-label">Total recorded weight</div><div class="metric-value">{{totalWeight}} kg</div></div></div></div>
+</div>
+
+<div class="row g-4">
+  <div class="col-xl-8">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white py-3">
+        <h2 class="h5 mb-0">Daily inbound</h2>
+        <div class="small text-secondary">Static CSS chart placeholder; no chart library is used.</div>
+      </div>
+      <div class="card-body">
+        <!-- CHART: daily-inbound -->
+        <div class="css-chart" aria-label="Daily inbound parcel chart">
+          {{#each dailyInbound}}
+            <div class="chart-column">
+              <div class="chart-value">{{count}}</div>
+              <div class="chart-bar" style="height: {{height}}%"></div>
+              <div class="chart-label">{{label}}</div>
+            </div>
+          {{/each}}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white py-3"><h2 class="h5 mb-0">Status breakdown</h2></div>
+      <div class="card-body vstack gap-3">
+        {{#each statusCounts}}
+          <div class="d-flex justify-content-between align-items-center"><span>{{@key}}</span><span class="badge text-bg-{{statusClass @key}}">{{this}}</span></div>
+        {{/each}}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm mt-4">
+  <div class="card-header bg-white py-3"><h2 class="h5 mb-0">Parcel types</h2></div>
+  <div class="card-body">
+    <div class="row g-3">
+      {{#each typeCounts}}
+        <div class="col-sm-6 col-lg-3"><div class="border rounded p-3 h-100"><div class="detail-label">{{@key}}</div><div class="fs-4 fw-semibold">{{this}}</div></div></div>
+      {{/each}}
+    </div>
+  </div>
+</div>
