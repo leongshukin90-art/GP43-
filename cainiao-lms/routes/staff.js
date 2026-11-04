@@ -13,7 +13,7 @@ const { readJson, writeJson } = require('../utils/db');
 const { logAction } = require( '../utils/logger' );
 const { nextId } = require('../utils/id');
 const { createParcel } = require('../utils/parcels');
-const { PACKAGE_TYPES } = require('../utils/packageStatus');
+const { PACKAGE_TYPES, canReportException } = require('../utils/packageStatus');
 const { trimText } = require('../utils/request');
 const router = express.Router();
 
@@ -250,28 +250,128 @@ router.post('/shelves/:id/status', stubPage({
 }));
 
 // --------------------------------------------------------------- exceptions
-router.get('/exceptions', stubPage({
-  owner: 'frontend-staff',
-  view: 'staff/exceptions',
-  title: 'Exceptions',
-  needs: ['Open and resolved exception lists', 'Report form', 'Resolve action'],
-  rules: []
-}));
+router.get('/exceptions', (req, res) => {
+  const exceptions = readJson('exceptions.json', []);
+  const packages = readJson('packages.json', []);
+  const packageById = new Map(packages.map((parcel) => [parcel.id, parcel]));
+  const items = exceptions
+    .map((exception) => ({ ...exception, parcel: packageById.get(exception.packageId) }))
+    .sort((left, right) => new Date(right.createdAt) - new Date(left.createdAt));
 
-router.post('/exceptions', stubPage({
-  owner: 'backend-admin',
-  view: 'staff/exceptions',
-  title: 'Report an exception',
-  needs: ['Require status Arrived, Shelved, or Notified', 'Remember the previous status'],
-  rules: []
-}));
+  return res.render('staff/exceptions', {
+    title: 'Exception parcels',
+    exceptions: items,
+    eligiblePackages: packages.filter((parcel) => canReportException(parcel.status)),
+    selectedPackageId: trimText(req.query.packageId),
+    error: trimText(req.query.error) || '',
+    success: trimText(req.query.success) || ''
+  });
+});
 
-router.post('/exceptions/:id/resolve', stubPage({
-  owner: 'backend-admin',
-  view: 'staff/exceptions',
-  title: 'Resolve an exception',
-  needs: ['Restore the previous status when shelf capacity is available, otherwise return the parcel to Arrived'],
-  rules: []
-}));
+router.post('/exceptions', (req, res) => {
+  const packages = readJson('packages.json', []);
+  const shelves = readJson('shelves.json', []);
+  const exceptions = readJson('exceptions.json', []);
+  const packageId = trimText(req.body.packageId);
+  const type = trimText(req.body.type);
+  const description = trimText(req.body.description);
+  const parcel = packages.find((item) => item.id === packageId);
+
+  if (!parcel) {
+    return res.redirect('/staff/exceptions?error=' + encodeURIComponent('Parcel not found.'));
+  }
+
+  if (!type || !description) {
+    return res.redirect('/staff/exceptions?packageId=' + encodeURIComponent(packageId) + '&error=' + encodeURIComponent('Type and description are required.'));
+  }
+
+  // Only parcels still in the normal flow can enter the exception workflow.
+  if (!canReportException(parcel.status)) {
+    return res.redirect('/staff/exceptions?packageId=' + encodeURIComponent(packageId) + '&error=' + encodeURIComponent('Parcel cannot enter the exception flow.'));
+  }
+
+  parcel.previousStatus = parcel.status;
+  if (parcel.shelfId) {
+    const shelf = shelves.find((item) => item.id === parcel.shelfId);
+    if (shelf && shelf.used > 0) shelf.used -= 1;
+  }
+  parcel.status = 'Exception';
+
+  const now = new Date().toISOString();
+  exceptions.push({
+    id: nextId('EXC', exceptions),
+    packageId: parcel.id,
+    type,
+    description,
+    status: 'Open',
+    reportedBy: global.currentUser.id,
+    createdAt: now,
+    resolvedAt: null
+  });
+
+  writeJson('packages.json', packages);
+  writeJson('shelves.json', shelves);
+  writeJson('exceptions.json', exceptions);
+  addTracking(parcel.id, 'Exception', type + ': ' + description);
+  logAction(global.currentUser, 'EXCEPTION_REPORTED', parcel.trackingNo + ': ' + type + '.');
+
+  return res.redirect('/staff/exceptions?success=' + encodeURIComponent('Exception reported.'));
+});
+
+router.post('/exceptions/:id/resolve', (req, res) => {
+  const packages = readJson('packages.json', []);
+  const shelves = readJson('shelves.json', []);
+  const exceptions = readJson('exceptions.json', []);
+  let notifications = readJson('notifications.json', []);
+  const originalNotificationCount = notifications.length;
+  const exception = exceptions.find((item) => item.id === req.params.id);
+
+  if (!exception || exception.status !== 'Open') {
+    return res.redirect('/staff/exceptions?error=' + encodeURIComponent('Open exception not found.'));
+  }
+
+  const parcel = packages.find((item) => item.id === exception.packageId);
+  if (!parcel) {
+    return res.redirect('/staff/exceptions?error=' + encodeURIComponent('Linked parcel not found.'));
+  }
+
+  const previousStatus = parcel.previousStatus || 'Arrived';
+  let restoredShelf = false;
+
+  if (parcel.shelfId && ['Shelved', 'Notified'].includes(previousStatus)) {
+    const shelf = shelves.find((item) => item.id === parcel.shelfId);
+    if (shelf && shelf.status === 'Active' && shelf.used < shelf.capacity) {
+      shelf.used += 1;
+      restoredShelf = true;
+    }
+  }
+
+  // If the original shelf is unavailable, remove state that can no longer be used.
+  if (!restoredShelf) {
+    parcel.shelfId = null;
+    parcel.pickupCode = null;
+    notifications = notifications.filter((notification) => notification.packageId !== parcel.id);
+  }
+
+  parcel.status = restoredShelf ? previousStatus : 'Arrived';
+  delete parcel.previousStatus;
+  exception.status = 'Resolved';
+  exception.resolvedAt = new Date().toISOString();
+
+  writeJson('packages.json', packages);
+  writeJson('shelves.json', shelves);
+  writeJson('exceptions.json', exceptions);
+  if (notifications.length !== originalNotificationCount) {
+    writeJson('notifications.json', notifications);
+  }
+  addTracking(
+    parcel.id,
+    parcel.status,
+    restoredShelf ? 'Exception resolved. Parcel restored to ' + parcel.status + '.' : 'Exception resolved. Parcel returned to intake.'
+  );
+  logAction(global.currentUser, 'EXCEPTION_RESOLVED', parcel.trackingNo + ': ' + exception.type + '.');
+
+  return res.redirect('/staff/exceptions?success=' + encodeURIComponent('Exception resolved.'));
+});
 
 module.exports = router;
