@@ -1,2 +1,83 @@
-﻿{{!-- OWNER: frontend-staff — replace this placeholder with the exception board. --}}
-{{> stub}}
+{{!-- Exceptions - frontend-staff --}}
+
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Exceptions</h2>
+  </div>
+
+  {{#if success}}
+  <div class="alert alert-success">{{success}}</div>
+  {{/if}}
+  {{#if error}}
+  <div class="alert alert-danger">{{error}}</div>
+  {{/if}}
+
+  <div class="card mb-4">
+    <div class="card-header">Report exception</div>
+    <div class="card-body">
+      <form method="POST" action="/staff/exceptions">
+        <div class="mb-3">
+          <label class="form-label">Parcel</label>
+          <select name="packageId" class="form-select" required>
+            <option value="">Select a parcel</option>
+            {{#each eligiblePackages}}
+            <option value="{{id}}">
+              {{trackingNo}} - {{recipientName}} ({{status}})
+            </option>
+            {{/each}}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Type</label>
+          <select name="type" class="form-select" required>
+            <option value="Damaged packaging">Damaged packaging</option>
+            <option value="Address issue">Address issue</option>
+            <option value="Missing">Missing</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea name="description" class="form-control" rows="3" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-warning">Report</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">Exception list</div>
+    <div class="card-body">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Package ID</th>
+            <th>Type</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each exceptions}}
+          <tr>
+            <td>{{packageId}}</td>
+            <td>{{type}}</td>
+            <td>{{description}}</td>
+            <td>{{status}}</td>
+            <td>
+              <form method="POST" action="/staff/exceptions/{{id}}/resolve" style="display:inline;">
+                <button type="submit" class="btn btn-sm btn-outline-success">Resolve</button>
+              </form>
+            </td>
+          </tr>
+          {{else}}
+          <tr>
+            <td colspan="5" class="text-center">No exceptions yet.</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
