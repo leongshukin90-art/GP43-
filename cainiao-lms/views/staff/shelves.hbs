@@ -1,2 +1,61 @@
-﻿{{!-- OWNER: frontend-staff — replace this placeholder with the shelf board. --}}
-{{> stub}}
+{{!-- Shelves - frontend-staff --}}
+
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Shelves</h2>
+  </div>
+
+  {{#if success}}
+  <div class="alert alert-success">{{success}}</div>
+  {{/if}}
+  {{#if error}}
+  <div class="alert alert-danger">{{error}}</div>
+  {{/if}}
+
+  <div class="row mb-4">
+    {{#each shelves}}
+    <div class="col-md-4 mb-3">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">{{code}}</h5>
+          <p class="mb-1 text-muted">{{cabinet}}</p>
+          <p class="mb-1">Status: {{status}}</p>
+          <p class="mb-2">Used: {{used}} / {{capacity}}</p>
+          <form method="POST" action="/staff/shelves/{{id}}/status">
+            <button type="submit" class="btn btn-sm btn-outline-secondary">Toggle status</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {{else}}
+    <div class="col-12">
+      <p class="text-muted">No shelves yet.</p>
+    </div>
+    {{/each}}
+  </div>
+
+  <div class="card">
+    <div class="card-header">Add shelf</div>
+    <div class="card-body">
+      <form method="POST" action="/staff/shelves">
+        <div class="row">
+          <div class="col-md-3 mb-2">
+            <label class="form-label">Code</label>
+            <input type="text" name="code" class="form-control" required>
+          </div>
+          <div class="col-md-3 mb-2">
+            <label class="form-label">Cabinet</label>
+            <input type="text" name="cabinet" class="form-control" required>
+          </div>
+          <div class="col-md-3 mb-2">
+            <label class="form-label">Capacity</label>
+            <input type="number" name="capacity" class="form-control" min="1" required>
+          </div>
+          <div class="col-md-3 mb-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-warning">Add shelf</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
