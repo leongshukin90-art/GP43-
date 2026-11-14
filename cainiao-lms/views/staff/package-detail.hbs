@@ -1,2 +1,101 @@
-﻿{{!-- OWNER: frontend-staff — replace this placeholder with the parcel detail + actions + timeline. --}}
-{{> stub}}
+{{!-- Package detail - frontend-staff --}}
+
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Parcel detail</h2>
+    <a href="/staff/packages" class="btn btn-outline-secondary">Back to list</a>
+  </div>
+
+  {{#if success}}
+  <div class="alert alert-success">{{success}}</div>
+  {{/if}}
+  {{#if error}}
+  <div class="alert alert-danger">{{error}}</div>
+  {{/if}}
+
+  <div class="card mb-4">
+    <div class="card-header">Basic info</div>
+    <div class="card-body">
+      <p><strong>Tracking:</strong> {{parcel.trackingNo}}</p>
+      <p><strong>Recipient:</strong> {{parcel.recipientName}}</p>
+      <p><strong>Type:</strong> {{parcel.type}}</p>
+      <p><strong>Weight:</strong> {{parcel.weight}} kg</p>
+      <p><strong>Status:</strong> {{parcel.status}}</p>
+      <p><strong>Pickup code:</strong> {{#if parcel.pickupCode}}{{parcel.pickupCode}}{{else}}-{{/if}}</p>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header">Actions</div>
+    <div class="card-body">
+      {{#if canShelve}}
+      <form method="POST" action="/staff/packages/{{parcel.id}}/shelf" class="mb-3">
+        <label class="form-label">Put on shelf</label>
+        <div class="input-group" style="max-width: 400px;">
+          <select name="shelfId" class="form-select" required>
+            <option value="">Select shelf</option>
+            {{#each shelves}}
+            <option value="{{id}}">{{code}} ({{used}}/{{capacity}})</option>
+            {{/each}}
+          </select>
+          <button type="submit" class="btn btn-warning">Shelve</button>
+        </div>
+      </form>
+      {{/if}}
+
+      {{#if canNotify}}
+      <form method="POST" action="/staff/packages/{{parcel.id}}/notify" class="mb-3">
+        <button type="submit" class="btn btn-warning">Generate notification</button>
+      </form>
+      {{/if}}
+
+      {{#if canPickup}}
+      <form method="POST" action="/staff/packages/{{parcel.id}}/pickup" class="mb-3">
+        <button type="submit" class="btn btn-warning">Confirm pickup</button>
+      </form>
+      {{/if}}
+
+      {{#if canReportException}}
+      <a href="/staff/exceptions?packageId={{parcel.id}}" class="btn btn-outline-danger">Report exception</a>
+      {{/if}}
+
+      {{#unless canShelve}}
+        {{#unless canNotify}}
+          {{#unless canPickup}}
+            {{#unless canReportException}}
+            <p class="text-muted mb-0">No actions available for this status.</p>
+            {{/unless}}
+          {{/unless}}
+        {{/unless}}
+      {{/unless}}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">Tracking history</div>
+    <div class="card-body">
+      <table class="table table-sm">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Event</th>
+            <th>Detail</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each tracking}}
+          <tr>
+            <td>{{createdAt}}</td>
+            <td>{{event}}</td>
+            <td>{{detail}}</td>
+          </tr>
+          {{else}}
+          <tr>
+            <td colspan="3" class="text-center">No tracking events yet.</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
