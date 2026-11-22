@@ -4,10 +4,15 @@
   <h2>Receive Parcel</h2>
   <p class="text-muted">Add a new parcel into the system</p>
 
+  {{#if success}}
+  <div class="alert alert-success">{{success}}</div>
+  {{/if}}
+  {{#if error}}
+  <div class="alert alert-danger">{{error}}</div>
+  {{/if}}
+
   <div class="card mb-4">
-    <div class="card-header">
-      Single Parcel
-    </div>
+    <div class="card-header">Single Parcel</div>
     <div class="card-body">
       <form method="POST" action="/staff/packages">
         <div class="mb-3">
@@ -19,8 +24,13 @@
           <input type="text" name="recipientName" class="form-control" required>
         </div>
         <div class="mb-3">
+          <label class="form-label">Recipient Phone</label>
+          <input type="text" name="recipientPhone" class="form-control" required>
+        </div>
+        <div class="mb-3">
           <label class="form-label">Customer</label>
-          <select name="customerId" class="form-select">
+          <select name="customerId" class="form-select" required>
+            <option value="">Select customer</option>
             {{#each customers}}
             <option value="{{id}}">{{name}}</option>
             {{/each}}
@@ -32,11 +42,16 @@
         </div>
         <div class="mb-3">
           <label class="form-label">Type</label>
-          <select name="type" class="form-select">
+          <select name="type" class="form-select" required>
+            {{#each types}}
+            <option value="{{this}}">{{this}}</option>
+            {{else}}
             <option>Parcel</option>
             <option>Document</option>
             <option>Fragile</option>
             <option>Bulky</option>
+            <option>Cold Chain</option>
+            {{/each}}
           </select>
         </div>
         <button type="submit" class="btn btn-warning">Receive Parcel</button>
@@ -45,14 +60,23 @@
   </div>
 
   <div class="card">
-    <div class="card-header">
-      Batch Receive
-    </div>
+    <div class="card-header">Batch Receive</div>
     <div class="card-body">
       <form method="POST" action="/staff/packages/batch">
         <div class="mb-3">
-          <label class="form-label">One line per parcel (tracking | name | weight | type)</label>
-          <textarea name="batch" class="form-control" rows="6" placeholder="HK-3001 | Chan Tai Man | 1.5 | Parcel"></textarea>
+          <label class="form-label">Customer (for whole batch)</label>
+          <select name="customerId" class="form-select" required>
+            <option value="">Select customer</option>
+            {{#each customers}}
+            <option value="{{id}}">{{name}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">One line per parcel</label>
+          <p class="text-muted small mb-1">Format: tracking | name | phone | weight | type</p>
+          <textarea name="batch" class="form-control" rows="6"
+            placeholder="HK-3001 | Chan Tai Man | +852 9123 4001 | 1.5 | Parcel"></textarea>
         </div>
         <button type="submit" class="btn btn-outline-secondary">Receive Batch</button>
       </form>
