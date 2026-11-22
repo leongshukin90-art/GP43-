@@ -31,6 +31,10 @@ function canPickup(status) {
   return status === 'Notified';
 }
 
+function hasFreeCapacity(shelf){
+  return shelf.status === 'Active' && shelf.used < shelf.capacity;
+}
+
 module.exports = {
   PACKAGE_STATUSES,
   PACKAGE_TYPES,
@@ -38,5 +42,6 @@ module.exports = {
   canPickup,
   canReportException,
   canShelve,
+  hasFreeCapacity,
   statusClass
 };

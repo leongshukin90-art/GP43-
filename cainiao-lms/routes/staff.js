@@ -11,9 +11,10 @@ const express = require('express');
 const { stubPage } = require('../utils/stub');
 const { readJson, writeJson } = require('../utils/db');
 const { logAction } = require( '../utils/logger' );
-const { nextId } = require('../utils/id');
-const { createParcel } = require('../utils/parcels');
-const { PACKAGE_TYPES, canReportException } = require('../utils/packageStatus');
+const { nextId, generatePickupCode } = require('../utils/id');
+const { createParcel,countByStatus } = require('../utils/parcels');
+const { PACKAGE_STATUSES, PACKAGE_TYPES, canShelve, canNotify, canPickup, canReportException, hasFreeCapacity } = require('../utils/packageStatus');
+const { paginate } = require('../utils/pagination');
 const { trimText } = require('../utils/request');
 const router = express.Router();
 
@@ -47,23 +48,92 @@ function addTracking(packageId,status,description){
   writeJson('tracking.json',tracking);
 }
 
+// Render the parcel detail page with the variables the view expects.
+function renderParcelDetail(res, parcel, options = {}) {
+  const tracking = readJson('tracking.json', [])
+    .filter((item) => item.packageId === parcel.id)
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .map((item) => ({ createdAt: item.createdAt, event: item.status, detail: item.description }));
+
+  const shelves = readJson('shelves.json', []);
+
+  return res.render('staff/package-detail', {
+    title: 'Parcel detail',
+    parcel,
+    tracking,
+    shelves,
+    canShelve: canShelve(parcel.status),
+    canNotify: canNotify(parcel.status),
+    canPickup: canPickup(parcel.status),
+    canReportException: canReportException(parcel.status),
+    success: options.success || null,
+    error: options.error || null
+  });
+}
+
 // ---------------------------------------------------------------- dashboard
-router.get('/dashboard', stubPage({
-  owner: 'frontend-staff',
-  view: 'staff/dashboard',
-  title: 'Staff dashboard',
-  needs: ['Total / Arrived / Notified / Exception counts', 'Active shelf count', 'Recent arrivals', 'Quick action links'],
-  rules: ['Read-only page: it must not change parcel state.']
-}));
+router.get('/dashboard', (req,res) => {
+  const packages = readJson('packages.json',[]);
+  const shelves = readJson('shelves.json',[]);
+  const counts = countByStatus(packages, PACKAGE_STATUSES);
+  const totalPackages = packages.length;
+  const activeShelves = shelves.filter((s) => s.status === 'Active').length;
+  return res.render('staff/dashboard',{
+    title: 'Staff dashboard',
+    counts,
+    totalPackages,
+    activeShelves
+  });
+});
 
 // ------------------------------------------------------------------ parcels
-router.get('/packages', stubPage({
-  owner: 'frontend-staff',
-  view: 'staff/packages',
-  title: 'Parcels',
-  needs: ['Table of parcels', 'Filters: q, status, type', 'Pagination: page'],
-  rules: ['Filters must survive paging.', 'Status badge uses text-bg-{{statusClass status}}.']
-}));
+router.get('/packages',(req,res) => {
+  const q = trimText(req.query.q);
+  const status = trimText(req.query.status);
+  const type = trimText(req.query.type);
+  const page = Number(req.query.page) || 1;
+
+  let packages = readJson('packages.json',[]);
+
+  if (q) {
+    const keyword = q.toLowerCase();
+    packages = packages.filter((p) =>
+    (p.trackingNo || '').toLowerCase().includes(keyword) ||
+    (p.recipientName || '').toLowerCase().includes(keyword) ||
+    (p.recipientPhone || '').toLowerCase().includes(keyword) ||
+    (p.pickupCode || '').toLowerCase().includes(keyword)
+    );
+  }
+
+  if (status) {
+    packages = packages.filter((p) => p.status === status);
+  }
+
+  if (type) {
+    packages = packages.filter((p) => p.type === type);
+  }
+
+  const result = paginate(packages,{
+    pageSize: 10,
+    page,
+    query: { q,status, type },
+    path: '/staff/packages'
+  });
+
+  return res.render('staff/packages',{
+    title: 'Parcels',
+    packages: result.items,
+    total: result.total,
+    page: result.page,
+    totalPages: result.totalPages,
+    pagination: result.pagination,
+    filters: { q, status, type },
+    statuses: PACKAGE_STATUSES,
+    types: PACKAGE_TYPES,
+    success: trimText(req.query.success) || null,
+    error: trimText(req.query.error) || null
+  });
+});
 
 // Declared before '/packages/:id' so "create" is not read as an ID.
 router.get('/packages/create', (req,res) =>{
@@ -192,62 +262,228 @@ router.post('/packages/batch', (req, res) => {
   return res.redirect(`/staff/packages?success=${encodeURIComponent(report)}`);
 });
 
-router.get('/packages/:id', stubPage({
-  owner: 'frontend-staff',
-  view: 'staff/package-detail',
-  title: 'Parcel detail',
-  needs: ['Parcel fields', 'Tracking timeline (newest first)', 'Only the actions valid for the current status'],
-  rules: ['Hide invalid actions in the page AND reject them on the server.']
-}));
+router.get('/packages/:id',(req,res) => {
+  const packages = readJson('packages.json',[]);
+  const parcel = packages.find((p) => p.id === req.params.id);
 
-router.post('/packages/:id/shelf', stubPage({
-  owner: 'backend-parcel',
-  view: 'staff/package-detail',
-  title: 'Assign a shelf',
-  needs: ['Require status Arrived', 'Require an Active shelf with free capacity', 'Generate a six-digit pickup code'],
-  rules: ['Increment shelf.used only on success.']
-}));
+  if (!parcel) {
+    return res.status(404).render ('error',{
+      title:'Page not found',
+      status:404,
+      message: 'Parcel not found.'
+    });
+  }
 
-router.post('/packages/:id/notify', stubPage({
-  owner: 'backend-parcel',
-  view: 'staff/package-detail',
-  title: 'Generate a pickup notification',
-  needs: ['Require status Shelved and an existing pickup code', 'Render the message from config.notificationTemplate'],
-  rules: ['Create at most one notification per parcel.']
-}));
+  return renderParcelDetail(res,parcel,{
+    success:req.query.success || null,
+    error: req.query.error || null
+  });
+});
 
-router.post('/packages/:id/pickup', stubPage({
-  owner: 'backend-parcel',
-  view: 'staff/package-detail',
-  title: 'Confirm pickup',
-  needs: ['Require status Notified', 'Release the shelf slot'],
-  rules: ['No Arrived-to-Picked-Up shortcut.']
-}));
+router.post('/packages/:id/shelf', (req, res) => {
+  const packageId = req.params.id;
+  const shelfId = trimText(req.body.shelfId);
+
+  const packages = readJson('packages.json', []);
+  const shelves = readJson('shelves.json', []);
+  const parcel = packages.find((p) => p.id === packageId);
+  const shelf = shelves.find((s) => s.id === shelfId);
+
+  if (!parcel) {
+    return res.status(404).render('error', {
+      title: 'Page not found',
+      status: 404,
+      message: 'Parcel not found.'
+    });
+  }
+
+  if (!canShelve(parcel.status)) {
+    return renderParcelDetail(res, parcel, { error: 'Only an Arrived parcel can be placed on a shelf.' });
+  }
+  if (!shelf) {
+    return renderParcelDetail(res, parcel, { error: 'Choose a shelf.' });
+  }
+  if (!hasFreeCapacity(shelf)) {
+    return renderParcelDetail(res, parcel, { error: 'That shelf is full or is not active.' });
+  }
+
+  parcel.shelfId = shelf.id;
+  parcel.pickupCode = generatePickupCode(packages.map((p) => p.pickupCode));
+  parcel.status = 'Shelved';
+  parcel.shelvedAt = new Date().toISOString();
+
+  shelf.used += 1;
+
+  writeJson('packages.json', packages);
+  writeJson('shelves.json', shelves);
+
+  addTracking(packageId, 'Shelved', `Placed on shelf ${shelf.code}. Pickup code ${parcel.pickupCode}.`);
+  logAction(global.currentUser, 'SHELVE', `Assigned ${parcel.trackingNo} to shelf ${shelf.code}.`);
+
+  return res.redirect(`/staff/packages/${packageId}`);
+});
+
+router.post('/packages/:id/notify', (req,res) => {
+  const packageId = req.params.id;
+
+  const packages = readJson('packages.json',[]);
+  const parcel = packages.find((p) => p.id === packageId);
+
+  if(!parcel){
+    return res.status(404).render('error',{
+      title: 'Page not found',
+      status:404,
+      message:'Parcel not found.'
+    });
+  }
+
+  if(!canNotify(parcel.status)){
+    return renderParcelDetail(res,parcel,{ error: 'Only a Shelved parcel can be notified.'});
+  }
+
+  if(!parcel.pickupCode){
+    return renderParcelDetail(res,parcel,{ error: 'This parcel has no pickup code yet.'});
+  }
+
+  const config = readJson('config.json',{});
+  const notifications = readJson('notifications.json',[]);
+//check the notificaiton is send or not
+  const alreadyNotified = notifications.find((n) => n.packageId === parcel.id);
+
+  if(!alreadyNotified){
+    let content = config.notificationTemplate;
+    content = content.replaceAll('{{name}}', parcel.recipientName);
+    content = content.replaceAll('{{trackingNo}}',parcel.trackingNo);
+    content = content.replaceAll('{{siteName}}',config.siteName);
+    content = content.replaceAll('{{pickupCode}}',parcel.pickupCode);
+
+    const newNotification = {
+      id: nextId('NOT', notifications),
+      userId: parcel.customerId,
+      packageId: parcel.id,
+      title: 'Parcel ready for pickup: '+ parcel.trackingNo,
+      content: content,
+      isRead: false,
+      createAt: new Date().toISOString()
+    };
+
+    notifications.push(newNotification);
+    writeJson('notifications.json', notifications);
+  }
+
+  parcel.status = 'Notified';
+  parcel.notifiedAt = new Date().toISOString();
+  writeJson('packages.json', packages);
+
+  addTracking(packageId, 'Notified', 'Pickup notification generated with code '+ parcel.pickupCode + '.');
+  logAction(global.currentUser,'Notify', 'Notified' + parcel.trackingNo + 'with pickup code ' + parcel.pickupCode + '.');
+  return res.redirect('/staff/packages/' + packageId);
+});
+
+router.post('/packages/:id/pickup', (req,res) => {
+  const packageId = req.params.id;
+  //read packages and shelves.find parcel.
+  const packages = readJson('packages.json',[]);
+  const shelves = readJson('shelves.json',[]);
+  const parcel = packages.find((p) => p.id === packageId);
+
+  if(!parcel){
+    return res.status(404).render('error',{
+      title: 'Page not found',
+      status: 404,
+      message: 'Parcel not found.'
+    });
+  }
+
+  if(!canPickup(parcel.status)){
+    return renderParcelDetail(res,parcel,{ error: 'Only a Notified parcel can be picked up.'});
+  }
+
+  const shelf = shelves.find((s) => s.id === parcel.shelfId);
+  if (shelf && shelf.used >0){
+    shelf.used -= 1;
+  }
+
+  parcel.status = 'Picked Up';
+  parcel.pickedUpAt = new Date().toISOString();
+
+  writeJson('packages.json', packages);
+  writeJson('shelves.json', shelves);
+  addTracking(packageId,'Picked Up', 'Parcel handed to the customer.');
+  logAction(global.currentUser, 'PICKUP', 'Picked up ' + parcel.trackingNo + '.');
+  return res.redirect('/staff/packages/' + packageId);
+});
 
 // ------------------------------------------------------------------ shelves
-router.get('/shelves', stubPage({
-  owner: 'frontend-staff',
-  view: 'staff/shelves',
-  title: 'Shelves',
-  needs: ['Shelf cards: code, cabinet, status, used / capacity', 'Create shelf form', 'Move a shelf to maintenance'],
-  rules: ['A shelf with parcels cannot be moved to maintenance.']
-}));
+// ------------------------------------------------------------------ shelves
+router.get('/shelves', (req, res) => {
+  const shelves = readJson('shelves.json', []);
 
-router.post('/shelves', stubPage({
-  owner: 'backend-parcel',
-  view: 'staff/shelves',
-  title: 'Create a shelf',
-  needs: ['Validate code and capacity', 'Reject a duplicate shelf code'],
-  rules: []
-}));
+  return res.render('staff/shelves', {
+    title: 'Shelves',
+    shelves,
+    success: trimText(req.query.success) || null,
+    error: trimText(req.query.error) || null
+  });
+});
 
-router.post('/shelves/:id/status', stubPage({
-  owner: 'backend-parcel',
-  view: 'staff/shelves',
-  title: 'Change shelf status',
-  needs: ['Switch between Active and Maintenance'],
-  rules: []
-}));
+router.post('/shelves', (req, res) => {
+  const code = trimText(req.body.code);
+  const cabinet = trimText(req.body.cabinet);
+  const capacity = Number(req.body.capacity);
+
+  const shelves = readJson('shelves.json', []);
+
+  if (!code) {
+    return res.redirect('/staff/shelves?error=' + encodeURIComponent('Code is required.'));
+  }
+  if (shelves.some((s) => s.code === code)) {
+    return res.redirect('/staff/shelves?error=' + encodeURIComponent('That shelf code is already in use.'));
+  }
+  if (!cabinet) {
+    return res.redirect('/staff/shelves?error=' + encodeURIComponent('Cabinet is required.'));
+  }
+  if (!Number.isFinite(capacity) || capacity <= 0) {
+    return res.redirect('/staff/shelves?error=' + encodeURIComponent('Capacity must be a positive number.'));
+  }
+
+  const newShelf = {
+    id: nextId('SHELF', shelves),
+    code,
+    cabinet,
+    capacity,
+    used: 0,
+    status: 'Active'
+  };
+  shelves.push(newShelf);
+  writeJson('shelves.json', shelves);
+
+  logAction(global.currentUser, 'SHELF_CREATE', 'Created shelf ' + code + '.');
+  return res.redirect('/staff/shelves?success=' + encodeURIComponent('Shelf created.'));
+});
+
+router.post('/shelves/:id/status', (req, res) => {
+  const shelves = readJson('shelves.json', []);
+  const shelf = shelves.find((s) => s.id === req.params.id);
+
+  if (!shelf) {
+    return res.redirect('/staff/shelves?error=' + encodeURIComponent('Shelf not found.'));
+  }
+
+  if (shelf.status === 'Active' && shelf.used > 0) {
+    return res.redirect('/staff/shelves?error=' + encodeURIComponent('A shelf with parcels cannot be moved to maintenance.'));
+  }
+
+  if (shelf.status === 'Active') {
+    shelf.status = 'Maintenance';
+  } else {
+    shelf.status = 'Active';
+  }
+  writeJson('shelves.json', shelves);
+
+  logAction(global.currentUser, 'SHELF_STATUS', 'Changed shelf ' + shelf.code + ' to ' + shelf.status + '.');
+  return res.redirect('/staff/shelves?success=' + encodeURIComponent('Shelf status updated.'));
+});
 
 // --------------------------------------------------------------- exceptions
 router.get('/exceptions', (req, res) => {
