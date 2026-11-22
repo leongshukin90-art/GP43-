@@ -35,6 +35,7 @@ router.get('/reports', (req, res) => {
   res.render('admin/reports', {
     title: 'Reports',
     totalPackages: packages.length,
+    readyForPickup: statusCounts.Notified || 0,
     totalWeight: Number(packages.reduce((sum, parcel) => sum + Number(parcel.weight || 0), 0).toFixed(2)),
     statusCounts,
     typeCounts,
