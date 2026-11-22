@@ -6,9 +6,48 @@
     <a href="/staff/packages/create" class="btn btn-warning">Receive parcel</a>
   </div>
 
+  {{#if success}}
+  <div class="alert alert-success">{{success}}</div>
+  {{/if}}
+  {{#if error}}
+  <div class="alert alert-danger">{{error}}</div>
+  {{/if}}
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <form method="GET" action="/staff/packages" class="row g-2 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label">Search</label>
+          <input type="text" name="q" class="form-control" value="{{filters.q}}" placeholder="Tracking or name">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-select">
+            <option value="">All</option>
+            {{#each statuses}}
+            <option value="{{this}}" {{#if (eq this ../filters.status)}}selected{{/if}}>{{this}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Type</label>
+          <select name="type" class="form-select">
+            <option value="">All</option>
+            {{#each types}}
+            <option value="{{this}}" {{#if (eq this ../filters.type)}}selected{{/if}}>{{this}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-outline-secondary w-100">Filter</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-header">
-      Parcel List
+      Parcel List {{#if total}}({{total}}){{/if}}
     </div>
     <div class="card-body">
       <table class="table table-striped">
@@ -39,6 +78,18 @@
           {{/each}}
         </tbody>
       </table>
+
+      {{#if pagination}}
+      <nav>
+        <ul class="pagination mb-0">
+          {{#each pagination}}
+          <li class="page-item {{#if active}}active{{/if}}">
+            <a class="page-link" href="{{url}}">{{number}}</a>
+          </li>
+          {{/each}}
+        </ul>
+      </nav>
+      {{/if}}
     </div>
   </div>
 </div>
